@@ -21,8 +21,10 @@ Sistem Informasi Booking Lapangan Olahraga Berbasis Web
 ## Instalasi
 1. `git clone https://github.com/kalanarama/bintang-sport-system.git`
 2. `composer install`
-3. `cp .env.example .env`
-4. `php artisan key:generate`
-5. Isi konfigurasi database di `.env`
-6. `php artisan migrate`
-7. `php artisan serve`
+3. `npm install`
+4. `npm run dev`
+5. `cp .env.example .env`
+6. `php artisan key:generate`
+7. Isi konfigurasi database di `.env`
+8. `php artisan migrate`
+9. `php artisan serve`
