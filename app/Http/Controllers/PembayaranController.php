@@ -15,7 +15,7 @@ class PembayaranController extends Controller
         $booking = Booking::with(['jadwal.lapangan', 'pelanggan'])
             ->findOrFail($bookingId);
 
-        if ($booking->status !== 'pending') {
+        if ($booking->status !== 'Tertunda') {
             return redirect()->route('pembayaran.sukses', $bookingId);
         }
 
@@ -27,7 +27,7 @@ class PembayaranController extends Controller
         $booking = Booking::with(['jadwal.lapangan', 'pelanggan'])
             ->findOrFail($bookingId);
 
-        if ($booking->status !== 'pending') {
+        if ($booking->status !== 'Tertunda') {
             return redirect()->route('pembayaran.sukses', $bookingId);
         }
 
@@ -36,13 +36,12 @@ class PembayaranController extends Controller
             'metode_pembayaran'  => 'QRIS',
             'tanggal_pembayaran' => now()->toDateString(),
             'total_pembayaran'   => $booking->total_bayar,
-            'status_pembayaran'  => 'lunas',
+            'status_pembayaran'  => 'Berhasil',
         ]);
 
-        $booking->update(['status' => 'booked']);
+        $booking->update(['status' => 'Berhasil']);
 
-        
-        Jadwal::where('id', $booking->jadwal_id)->update(['status_jadwal' => 'booked']);
+        Jadwal::where('id', $booking->jadwal_id)->update(['status_jadwal' => 'Penuh']);
 
         Notifikasi::create([
             'booking_id'      => $booking->id,

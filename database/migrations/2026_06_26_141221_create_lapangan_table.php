@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('nama_lapangan');
             $table->string('jenis_lapangan');
             $table->decimal('harga_lapangan', 10, 2); 
-            $table->enum('status_lapangan', ['aktif', 'nonaktif'])->default('aktif'); 
+            $table->enum('status_lapangan', ['Aktif', 'Nonaktif'])->default('Aktif'); 
             $table->timestamps();
         });
     }

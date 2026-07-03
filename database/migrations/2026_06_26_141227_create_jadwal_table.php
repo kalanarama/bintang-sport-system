@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date('tanggal_jadwal');
             $table->time('jam_mulai');
             $table->time('jam_selesai');
-            $table->enum('status_jadwal', ['available', 'booked', 'maintenance'])->default('available'); 
+            $table->enum('status_jadwal', ['Tersedia', 'Penuh'])->default('Tersedia'); 
             $table->timestamps();
         });
     }

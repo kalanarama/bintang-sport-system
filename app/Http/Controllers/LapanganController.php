@@ -24,7 +24,7 @@ class LapanganController extends Controller
             'nama_lapangan'   => 'required|string|max:255',
             'jenis_lapangan'  => 'required|string|max:255',
             'harga_lapangan'  => 'required|numeric|min:0',
-            'status_lapangan' => 'required|in:aktif,nonaktif',
+            'status_lapangan' => 'required|in:Aktif,Nonaktif',
         ]);
 
         Lapangan::create($request->only([
@@ -46,7 +46,7 @@ class LapanganController extends Controller
             'nama_lapangan'   => 'required|string|max:255',
             'jenis_lapangan'  => 'required|string|max:255',
             'harga_lapangan'  => 'required|numeric|min:0',
-            'status_lapangan' => 'required|in:aktif,nonaktif',
+            'status_lapangan' => 'required|in:Aktif,Nonaktif',
         ]);
 
         $lapangan->update($request->only([

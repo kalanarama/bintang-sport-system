@@ -16,7 +16,7 @@ class PromoController extends Controller
 
     public function create()
     {
-        $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
+        $lapangans = Lapangan::where('status_lapangan', 'Aktif')->get();
         return view('admin.promo.create', compact('lapangans'));
     }
 
@@ -47,7 +47,7 @@ class PromoController extends Controller
 
     public function edit(Promo $promo)
     {
-        $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
+        $lapangans = Lapangan::where('status_lapangan', 'Aktif')->get();
         return view('admin.promo.edit', compact('promo', 'lapangans'));
     }
 

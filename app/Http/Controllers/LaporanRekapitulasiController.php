@@ -14,8 +14,8 @@ class LaporanRekapitulasiController extends Controller
         $tanggalAkhir = $request->tanggal_akhir ?? now()->toDateString();
 
         $bookings = Booking::with(['jadwal.lapangan', 'pelanggan', 'pembayaran'])
-            ->whereBetween('tanggal_dibuat', [$tanggalAwal, $tanggalAkhir])
-            ->where('status', 'booked')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+            ->where('status', 'Berhasil')
             ->latest()
             ->get();
 
@@ -35,8 +35,8 @@ class LaporanRekapitulasiController extends Controller
         $tanggalAkhir = $request->tanggal_akhir ?? now()->toDateString();
 
         $bookings = Booking::with(['jadwal.lapangan', 'pelanggan', 'pembayaran'])
-            ->whereBetween('tanggal_dibuat', [$tanggalAwal, $tanggalAkhir])
-            ->where('status', 'booked')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+            ->where('status', 'Berhasil')
             ->latest()
             ->get();
 

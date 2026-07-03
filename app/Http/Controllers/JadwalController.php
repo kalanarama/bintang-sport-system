@@ -34,7 +34,7 @@ class JadwalController extends Controller
             'tanggal_jadwal' => $request->tanggal_jadwal,
             'jam_mulai'      => $request->jam_mulai,
             'jam_selesai'    => $request->jam_selesai,
-            'status_jadwal'  => true, 
+            'status_jadwal' => 'Tersedia', 
         ]);
 
         return redirect()->route('jadwal.index')

@@ -19,7 +19,7 @@ class BookingController extends Controller
     public function create()
     {
         $jadwals = Jadwal::with('lapangan')
-            ->where('status_jadwal', 'available') 
+            ->where('status_jadwal', 'Tersedia')
             ->where('tanggal_jadwal', '>=', now()->toDateString())
             ->get();
         return view('pelanggan.booking.create', compact('jadwals'));
@@ -35,7 +35,7 @@ class BookingController extends Controller
 
         $jadwal = Jadwal::with('lapangan')->findOrFail($request->jadwal_id);
 
-        if ($jadwal->status_jadwal != 'available') {
+        if ($jadwal->status_jadwal != 'Tersedia') {
             return back()->withErrors(['jadwal_id' => 'Jadwal ini sudah tidak tersedia.']);
         }
 
@@ -61,7 +61,7 @@ class BookingController extends Controller
             'jam_mulai'      => $jadwal->jam_mulai,
             'jam_selesai'    => $jadwal->jam_selesai,
             'total_bayar'    => $totalBayar,
-            'status'         => 'pending',
+            'status'         => 'Tertunda',
             'kode_booking'   => 'BSC-' . strtoupper(Str::random(6)) . '-' . now()->format('dmY'),
         ]);
 

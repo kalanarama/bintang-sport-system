@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('pembayaran', function (Blueprint $table) {
             $table->id();
             $table->foreignId('booking_id')->constrained('booking')->onDelete('cascade');
-            $table->string('metode_pembayaran')->default('QRIS');
+            $table->enum('metode_pembayaran', ['QRIS']);
             $table->date('tanggal_pembayaran')->nullable();
-            $table->decimal('total_pembayaran', 10, 2); 
-            $table->enum('status_pembayaran', ['pending', 'lunas', 'gagal'])->default('pending'); 
+            $table->decimal('total_pembayaran', 10, 2);
+            $table->enum('status_pembayaran', ['Tertunda', 'Berhasil', 'Dibatalkan'])->default('Tertunda');
             $table->timestamps();
         });
     }

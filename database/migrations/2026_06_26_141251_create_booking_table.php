@@ -15,7 +15,7 @@ return new class extends Migration
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->decimal('total_bayar', 10, 2); 
-            $table->enum('status', ['pending', 'booked', 'canceled'])->default('pending'); 
+            $table->enum('status', ['Tertunda', 'Berhasil', 'Dibatalkan'])->default('Tertunda');
             $table->string('kode_booking')->unique();
             $table->timestamps();
         });
