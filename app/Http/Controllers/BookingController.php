@@ -70,7 +70,7 @@ class BookingController extends Controller
 
 
     public function cek() {
-        return view('pelanggan.riwayat')
+        return view('pelanggan.riwayat');
     }
     public function cekStatus(Request $request)
     {
