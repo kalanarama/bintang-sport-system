@@ -30,9 +30,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/jadwal', [JadwalController::class, 'public'])->name('jadwal.public');
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-Route::get('/cek-status', function () {
-    return view('pelanggan.booking.cek');
-})->name('booking.cek');
+Route::get('/cek-status',[BookingController::class, 'cek'])->name('booking.cek');
 Route::post('/cek-status', [BookingController::class, 'cekStatus'])->name('booking.cekStatus');
 
 // Pembayaran (publik karena pelanggan ga login)
