@@ -68,6 +68,10 @@ class BookingController extends Controller
         return redirect()->route('pembayaran.show', $booking->id);
     }
 
+
+    public function cek() {
+        return view('pelanggan.riwayat')
+    }
     public function cekStatus(Request $request)
     {
         $request->validate([
