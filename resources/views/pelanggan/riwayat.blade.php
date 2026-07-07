@@ -3,76 +3,85 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cek Riwayat Pesanan</title>
+    <title>Riwayat - Bintang Sport</title>
     <style>
-        /* --- RESET & VARIABEL WARNA --- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f7fa; /* Neutral dari desain */
-            color: #1f2937;
-            line-height: 1.6;
+            background: #f4f7fa;
+            color: #10275b;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+
         a {
             text-decoration: none;
             color: inherit;
         }
 
-        /* --- NAVBAR --- */
+        /* NAVBAR */
         .navbar {
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            padding: 14px 40px;
+            padding: 14px 60px;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
+
         .navbar .logo img {
             height: 44px;
             width: auto;
             display: block;
         }
+
         .navbar nav {
             display: flex;
-            gap: 32px;
+            gap: 40px;
         }
+
         .navbar nav a {
             font-weight: 600;
             font-size: 15px;
             color: #475569;
-            transition: color 0.2s;
         }
-        .navbar nav a:hover {
-            color: #0052cc;
-        }
+
+        .navbar nav a:hover,
         .navbar nav a.active {
             color: #0052cc;
         }
+
         .navbar .btn-nav {
-            background: #0052cc;
-            color: white;
+            background: #0756d9;
+            color: #fff;
             font-weight: 600;
             font-size: 14px;
             padding: 10px 22px;
             border-radius: 24px;
-            transition: background 0.2s;
             white-space: nowrap;
+            transition: 0.2s;
+            box-shadow: 0 5px 11px rgba(7, 86, 217, 0.28);
         }
+
         .navbar .btn-nav:hover {
-            background: #003d99;
+            background: #0348b9;
         }
 
         /* --- CONTAINER UTAMA --- */
         .container {
             max-width: 460px;
-            margin: 60px auto 20px;
+            margin: 105px auto 20px;
             padding: 0 20px;
             flex: 1;
         }
@@ -90,6 +99,7 @@
         .icon-wrapper {
             text-align: center;
             margin-bottom: 16px;
+
         }
         .icon-wrapper .icon-box {
             display: inline-flex;
@@ -100,19 +110,21 @@
             background: #0052cc;
             border-radius: 14px;
         }
+
         .icon-wrapper .icon-box img {
-            width: 28px;
-            height: 28px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
         }
 
         h1 {
             font-size: 25px;
             font-weight: 700;
-            color: #03045e; /* Tertiary dari desain */
+            color: #03045e;
             margin-bottom: 6px;
             text-align: center;
         }
+
         .subtitle {
             color: #475569;
             font-size: 15px;
@@ -124,12 +136,14 @@
         .form-group {
             margin-bottom: 18px;
         }
+
         label {
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
             color: #1e293b;
         }
+
         .input-wrapper {
             display: flex;
             align-items: center;
@@ -139,16 +153,19 @@
             overflow: hidden;
             transition: border 0.2s;
         }
+
         .input-wrapper:focus-within {
-            border-color: #0052cc; /* Primary */
+            border-color: #0052cc;
             box-shadow: 0 0 0 3px rgba(0,82,204,0.15);
         }
+
         .input-wrapper span {
             padding: 12px 16px;
             color: #1e293b;
             font-weight: 500;
             border-right: 1px solid #cbd5e1;
         }
+
         .input-wrapper input {
             border: none;
             padding: 12px 16px;
@@ -159,7 +176,7 @@
         }
 
         .btn-primary {
-            background: #0052cc; /* Primary */
+            background: #0052cc;
             color: white;
             border: none;
             padding: 14px 30px;
@@ -174,9 +191,11 @@
             justify-content: center;
             gap: 10px;
         }
+
         .btn-primary:hover {
             background: #003d99;
         }
+
         .btn-primary svg {
             width: 18px;
             height: 18px;
@@ -197,11 +216,12 @@
 
         /* --- FOOTER --- */
         .footer {
-            background: #03045e; /* Tertiary */
+            background: #03045e;
             color: #f4f7fa;
             padding: 50px 40px 30px;
             margin-top: 60px;
         }
+
         .footer-inner {
             max-width: 1100px;
             margin: 0 auto;
@@ -209,35 +229,43 @@
             grid-template-columns: 1.6fr 1fr 1fr;
             gap: 30px;
         }
+
         .footer .brand-logo img {
             height: 60px;
             margin-bottom: 12px;
         }
+
         .footer .tagline {
             font-size: 14px;
             color: #cbd5e1;
             max-width: 380px;
         }
+
         .footer h3 {
             font-size: 18px;
             font-weight: 700;
             color: white;
             margin-bottom: 16px;
         }
+
         .footer ul {
             list-style: none;
         }
+
         .footer ul li {
             margin-bottom: 12px;
         }
+
         .footer ul li a {
             color: #cbd5e1;
             font-size: 15px;
             transition: color 0.2s;
         }
+
         .footer ul li a:hover {
             color: white;
         }
+
         .footer-bottom {
             border-top: 1px solid rgba(255,255,255,0.15);
             margin-top: 40px;
@@ -268,12 +296,12 @@
 
     <!-- NAVBAR -->
     <div class="navbar">
-        <a href="{{ url('/') }}" class="logo">
+        <a href="{{ url('/beranda') }}" class="logo">
             <img src="{{ asset('img/logo.png') }}" alt="Bintang Sport" />
         </a>
         <nav>
-            <a href="{{ url('/') }}">Beranda</a>
-            <a href="#">Lapangan</a>
+            <a href="{{ url('/beranda') }}">Beranda</a>
+            <a href="{{ url('/lapangan') }}">Lapangan</a>
             <a href="{{ route('jadwal.public') }}">Jadwal</a>
             <a href="{{ route('booking.cek') }}" class="active">Riwayat</a>
         </nav>
@@ -335,8 +363,8 @@
             <div>
                 <h3>Menu Cepat</h3>
                 <ul>
-                    <li><a href="{{ url('/') }}">Beranda</a></li>
-                    <li><a href="#">Lapangan</a></li>
+                    <li><a href="{{ url('/beranda') }}">Beranda</a></li>
+                    <li><a href="{{ url('/lapangan') }}">Lapangan</a></li>
                     <li><a href="{{ route('jadwal.public') }}">Jadwal</a></li>
                     <li><a href="{{ route('booking.cek') }}">Booking Saya</a></li>
                 </ul>
