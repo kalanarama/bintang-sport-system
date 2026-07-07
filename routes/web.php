@@ -14,7 +14,7 @@ use App\Http\Controllers\LaporanRekapitulasiController;
 // REDIRECT ROOT
 // =====================
 Route::get('/', function () {
-    return redirect()->route('jadwal.public');
+    return view('welcome');
 });
 
 // =====================

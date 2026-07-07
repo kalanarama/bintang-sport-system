@@ -36,7 +36,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: url('https://images.unsplash.com/photo-1459865264687-595d652de67e?w=800') no-repeat center/cover;
+            background: url('{{ asset('img/rumput-lapangan.jpg') }}') no-repeat center/cover;
             opacity: 0.3;
             z-index: 1;
         }
