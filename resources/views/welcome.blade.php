@@ -602,7 +602,7 @@
         <h4>Masuk Sebagai</h4>
         <p>Pilih mode untuk mencoba sistem Bintang Sport Center</p>
         <div class="demo-options">
-            <a href="{{ route('jadwal.public') }}" class="demo-option">
+            <a href="{{ url('/beranda') }}" class="demo-option">
                 <div class="demo-option-icon pelanggan">
                     <i class="fas fa-user"></i>
                 </div>
