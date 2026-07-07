@@ -11,7 +11,7 @@ use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\LaporanRekapitulasiController;
 
 // =====================
-// REDIRECT ROOT
+// REDIRECT ROOT PAGE
 // =====================
 Route::get('/', function () {
     return view('welcome');
