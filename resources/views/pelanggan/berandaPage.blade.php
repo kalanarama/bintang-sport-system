@@ -575,14 +575,14 @@
                     <img src="{{ asset('img/futsal-a01.png') }}" alt="Futsal A">
                     <h3><i class="fa-regular fa-futbol"></i> Futsal A</h3>
                     <p>Lapangan rumput sintetis berkualitas dengan pencahayaan indoor yang terang.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Lihat Jadwal</a>
+                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
                 </article>
 
                 <article class="lapangan-card reveal">
                     <img src="{{ asset('img/futsal-b.png') }}" alt="Futsal B">
                     <h3><i class="fa-regular fa-futbol"></i> Futsal B</h3>
                     <p>Lapangan indoor dengan suasana yang nyaman dan lapangan yang terawat.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Lihat Jadwal</a>
+                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
                 </article>
 
                 <article class="lapangan-card reveal">
@@ -593,14 +593,14 @@
                         Badminton
                     </h3>
                     <p>Lapangan badminton yang terawat dengan net standar berkualitas.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Lihat Jadwal</a>
+                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
                 </article>
 
                 <article class="lapangan-card reveal">
                     <img src="{{ asset('img/basket.png') }}" alt="Basket">
                     <h3><i class="fa-solid fa-basketball"></i> Basket</h3>
                     <p>Lapangan basket indoor yang nyaman dengan garis lapangan yang jelas.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Lihat Jadwal</a>
+                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
                 </article>
             </div>
         </section>
