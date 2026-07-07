@@ -27,6 +27,15 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // =====================
 // PUBLIK (tanpa login)
 // =====================
+
+Route::get('/beranda', function () {
+    return view('pelanggan.berandaPage');
+});
+
+Route::get('/lapangan', function () {
+    return view('pelanggan.lapanganPage');
+});
+
 Route::get('/jadwal', [JadwalController::class, 'public'])->name('jadwal.public');
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
