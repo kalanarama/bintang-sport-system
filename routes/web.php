@@ -27,7 +27,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // =====================
 // PUBLIK (tanpa login)
 // =====================
-
 Route::get('/beranda', function () {
     return view('pelanggan.berandaPage');
 });
@@ -36,10 +35,18 @@ Route::get('/lapangan', function () {
     return view('pelanggan.lapanganPage');
 });
 
+Route::get('/kebijakan-privasi', function () {
+    return view('pelanggan.kebijakan');
+})->name('kebijakan');
+
+Route::get('/syarat-ketentuan', function () {
+    return view('pelanggan.syarat');
+})->name('syarat');
+
 Route::get('/jadwal', [JadwalController::class, 'public'])->name('jadwal.public');
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-Route::get('/cek-status',[BookingController::class, 'cek'])->name('booking.cek');
+Route::get('/cek-status', [BookingController::class, 'cek'])->name('booking.cek');
 Route::post('/cek-status', [BookingController::class, 'cekStatus'])->name('booking.cekStatus');
 
 // Pembayaran (publik karena pelanggan ga login)

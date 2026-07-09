@@ -680,8 +680,8 @@
             <div>
                 <h3>Bantuan</h3>
                 <ul>
-                    <li><a href="#">Kebijakan Privasi</a></li>
-                    <li><a href="#">Syarat & Ketentuan</a></li>
+                    <li><a href="{{ route('kebijakan') }}">Kebijakan Privasi</a></li>
+                    <li><a href="{{ route('syarat') }}">Syarat & Ketentuan</a></li>
                 </ul>
             </div>
         </div>
