@@ -468,9 +468,9 @@
     </div>
 
     <div class="sidebar-logout">
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" id="logoutForm">
             @csrf
-            <button type="submit" class="btn-logout">
+            <button type="button" class="btn-logout" onclick="konfirmasiLogout()">
                 <i class="fas fa-right-from-bracket"></i>
                 <span>Logout</span>
             </button>
@@ -512,6 +512,23 @@
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
         sidebar.classList.add('collapsed');
         mainContent.classList.add('collapsed');
+    }
+    function konfirmasiLogout() {
+        Swal.fire({
+            title: 'Keluar dari sistem?',
+            text: 'Apakah Anda yakin ingin logout?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Logout',
+            cancelButtonText: 'Batal',
+            borderRadius: '16px',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logoutForm').submit();
+            }
+        });
     }
 </script>
 @stack('scripts')
