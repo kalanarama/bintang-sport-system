@@ -13,7 +13,6 @@
     </a>
 </div>
 
-
 @if(session('success'))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -23,6 +22,7 @@
                 text: '{{ session('success') }}',
                 confirmButtonColor: '#1565C0',
                 timer: 4000,
+                timerProgressBar: true,
                 showConfirmButton: false,
             });
         });
@@ -46,7 +46,7 @@
             <tbody>
                 @forelse($lapangans as $index => $lapangan)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $lapangans->firstItem() + $index }}</td>
                     <td>
                         @if($lapangan->foto_lapangan)
                             <img src="{{ asset($lapangan->foto_lapangan) }}"
@@ -70,6 +70,9 @@
                     </td>
                     <td>
                         <div class="d-flex gap-2">
+                            <a href="{{ route('admin.lapangan.show', $lapangan->id) }}" class="btn-detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
                             <a href="{{ route('admin.lapangan.edit', $lapangan->id) }}" class="btn-edit">
                                 <i class="fas fa-pen-to-square"></i>
                             </a>
@@ -88,6 +91,16 @@
             </tbody>
         </table>
     </div>
+    @if($lapangans->total() > 0)
+    <div class="d-flex justify-content-between align-items-center px-3 py-3"
+        style="border-top: 1px solid #f0f4ff;">
+        <small class="text-muted">
+            Menampilkan {{ $lapangans->firstItem() }}-{{ $lapangans->lastItem() }}
+            dari {{ $lapangans->total() }} data
+        </small>
+        {{ $lapangans->links('pagination::bootstrap-5') }}
+    </div>
+    @endif
 </div>
 
 <form id="formHapus" method="POST" style="display:none;">

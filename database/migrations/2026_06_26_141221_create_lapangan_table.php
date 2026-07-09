@@ -12,9 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('nama_lapangan');
             $table->string('jenis_lapangan');
-            $table->decimal('harga_lapangan', 10, 2); 
+            $table->decimal('harga_lapangan', 10, 2);
+            $table->time('jam_buka');
+            $table->time('jam_tutup');
+            $table->unsignedTinyInteger('durasi_slot');
             $table->string('foto_lapangan')->nullable();
-           $table->enum('status_lapangan', ['aktif', 'nonaktif'])->default('aktif'); 
+            $table->enum('status_lapangan', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamps();
         });
     }

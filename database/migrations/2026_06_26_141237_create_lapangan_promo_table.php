@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('lapangan_id')->constrained('lapangan')->onDelete('cascade');
             $table->foreignId('promo_id')->constrained('promo')->onDelete('cascade');
+            $table->foreignId('jadwal_id')->nullable()->constrained('jadwal')->onDelete('cascade');
             $table->timestamps();
         });
     }

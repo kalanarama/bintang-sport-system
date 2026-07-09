@@ -50,6 +50,43 @@
         </div>
 
         <div class="mb-3">
+            <label class="form-label">Jam Operasional</label>
+            <div class="d-flex align-items-start gap-2">
+                <div class="flex-fill">
+                    <input type="time" name="jam_buka"
+                        class="form-control @error('jam_buka') is-invalid @enderror"
+                        value="{{ old('jam_buka', $lapangan->jam_buka) }}">
+                    @error('jam_buka')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+                <span class="text-muted mt-2">s/d</span>
+                <div class="flex-fill">
+                    <input type="time" name="jam_tutup"
+                        class="form-control @error('jam_tutup') is-invalid @enderror"
+                        value="{{ old('jam_tutup', $lapangan->jam_tutup) }}">
+                    @error('jam_tutup')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Durasi Slot</label>
+            <select name="durasi_slot" class="form-select @error('durasi_slot') is-invalid @enderror">
+                <option value="">Pilih Durasi</option>
+                <option value="30" {{ old('durasi_slot', $lapangan->durasi_slot) == '30' ? 'selected' : '' }}>30 Menit</option>
+                <option value="60" {{ old('durasi_slot', $lapangan->durasi_slot) == '60' ? 'selected' : '' }}>60 Menit</option>
+                <option value="90" {{ old('durasi_slot', $lapangan->durasi_slot) == '90' ? 'selected' : '' }}>90 Menit</option>
+                <option value="120" {{ old('durasi_slot', $lapangan->durasi_slot) == '120' ? 'selected' : '' }}>120 Menit</option>
+            </select>
+            @error('durasi_slot')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
             <label class="form-label">Foto Lapangan</label>
             @if($lapangan->foto_lapangan)
                 <div class="mb-2">

@@ -10,7 +10,7 @@ class LapanganController extends Controller
 {
     public function index()
     {
-        $lapangans = Lapangan::all();
+        $lapangans = Lapangan::paginate(10);
         return view('admin.lapangan.index', compact('lapangans'));
     }
 
@@ -21,11 +21,21 @@ class LapanganController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->jam_buka) {
+            $request->merge(['jam_buka' => date('H:i', strtotime($request->jam_buka))]);
+        }
+        if ($request->jam_tutup) {
+            $request->merge(['jam_tutup' => date('H:i', strtotime($request->jam_tutup))]);
+        }
+
         $request->validate([
             'nama_lapangan'   => 'required|string|max:255',
             'jenis_lapangan'  => 'required|in:Badminton,Futsal,Basket',
             'harga_lapangan'  => 'required|numeric|min:1',
-            'foto_lapangan'   => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'jam_buka'        => 'required|date_format:H:i',
+            'jam_tutup'       => 'required|date_format:H:i|after:jam_buka',
+            'durasi_slot'     => 'required|in:30,60,90,120',
+            'foto_lapangan'   => 'required|image|mimes:jpg,jpeg,png|max:5120',
             'status_lapangan' => 'required|in:aktif,nonaktif',
         ], [
             'nama_lapangan.required'   => 'Nama lapangan wajib diisi.',
@@ -33,6 +43,14 @@ class LapanganController extends Controller
             'harga_lapangan.required'  => 'Harga lapangan wajib diisi.',
             'harga_lapangan.numeric'   => 'Harga lapangan harus berupa angka.',
             'harga_lapangan.min'       => 'Harga lapangan minimal Rp1.',
+            'jam_buka.required'        => 'Jam buka wajib diisi.',
+            'jam_buka.date_format'     => 'Format jam buka tidak valid.',
+            'jam_tutup.required'       => 'Jam tutup wajib diisi.',
+            'jam_tutup.date_format'    => 'Format jam tutup tidak valid.',
+            'jam_tutup.after'          => 'Jam tutup harus setelah jam buka.',
+            'durasi_slot.required'     => 'Durasi slot wajib dipilih.',
+            'durasi_slot.in'           => 'Durasi slot tidak valid.',
+            'foto_lapangan.required'   => 'Foto lapangan wajib diunggah.',
             'foto_lapangan.image'      => 'File harus berupa gambar.',
             'foto_lapangan.mimes'      => 'Format foto harus JPG, JPEG, atau PNG.',
             'foto_lapangan.max'        => 'Ukuran foto maksimal 5MB.',
@@ -40,7 +58,8 @@ class LapanganController extends Controller
         ]);
 
         $data = $request->only([
-            'nama_lapangan', 'jenis_lapangan', 'harga_lapangan', 'status_lapangan'
+            'nama_lapangan', 'jenis_lapangan', 'harga_lapangan',
+            'jam_buka', 'jam_tutup', 'durasi_slot', 'status_lapangan'
         ]);
 
         if ($request->hasFile('foto_lapangan')) {
@@ -56,6 +75,11 @@ class LapanganController extends Controller
             ->with('success', 'Data lapangan berhasil disimpan');
     }
 
+    public function show(Lapangan $lapangan)
+    {
+        return view('admin.lapangan.show', compact('lapangan'));
+    }
+
     public function edit(Lapangan $lapangan)
     {
         return view('admin.lapangan.edit', compact('lapangan'));
@@ -63,10 +87,20 @@ class LapanganController extends Controller
 
     public function update(Request $request, Lapangan $lapangan)
     {
+        if ($request->jam_buka) {
+            $request->merge(['jam_buka' => date('H:i', strtotime($request->jam_buka))]);
+        }
+        if ($request->jam_tutup) {
+            $request->merge(['jam_tutup' => date('H:i', strtotime($request->jam_tutup))]);
+        }
+
         $request->validate([
             'nama_lapangan'   => 'required|string|max:255',
             'jenis_lapangan'  => 'required|in:Badminton,Futsal,Basket',
             'harga_lapangan'  => 'required|numeric|min:1',
+            'jam_buka'        => 'required|date_format:H:i',
+            'jam_tutup'       => 'required|date_format:H:i|after:jam_buka',
+            'durasi_slot'     => 'required|in:30,60,90,120',
             'foto_lapangan'   => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'status_lapangan' => 'required|in:aktif,nonaktif',
         ], [
@@ -75,6 +109,13 @@ class LapanganController extends Controller
             'harga_lapangan.required'  => 'Harga lapangan wajib diisi.',
             'harga_lapangan.numeric'   => 'Harga lapangan harus berupa angka.',
             'harga_lapangan.min'       => 'Harga lapangan minimal Rp1.',
+            'jam_buka.required'        => 'Jam buka wajib diisi.',
+            'jam_buka.date_format'     => 'Format jam buka tidak valid.',
+            'jam_tutup.required'       => 'Jam tutup wajib diisi.',
+            'jam_tutup.date_format'    => 'Format jam tutup tidak valid.',
+            'jam_tutup.after'          => 'Jam tutup harus setelah jam buka.',
+            'durasi_slot.required'     => 'Durasi slot wajib dipilih.',
+            'durasi_slot.in'           => 'Durasi slot tidak valid.',
             'foto_lapangan.image'      => 'File harus berupa gambar.',
             'foto_lapangan.mimes'      => 'Format foto harus JPG, JPEG, atau PNG.',
             'foto_lapangan.max'        => 'Ukuran foto maksimal 5MB.',
@@ -82,7 +123,8 @@ class LapanganController extends Controller
         ]);
 
         $data = $request->only([
-            'nama_lapangan', 'jenis_lapangan', 'harga_lapangan', 'status_lapangan'
+            'nama_lapangan', 'jenis_lapangan', 'harga_lapangan',
+            'jam_buka', 'jam_tutup', 'durasi_slot', 'status_lapangan'
         ]);
 
         if ($request->hasFile('foto_lapangan')) {

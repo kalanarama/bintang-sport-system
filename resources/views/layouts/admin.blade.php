@@ -334,6 +334,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            text-decoration: none;
         }
 
         .btn-edit:hover { background: #1565C0; color: white; }
@@ -405,6 +406,20 @@
             justify-content: center;
             width: 100%;
         }
+
+        .btn-detail {
+            background: #fff3e0;
+            color: #e65100;
+            border: none;
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-detail:hover { background: #e65100; color: white; }
     </style>
     @stack('styles')
 </head>
