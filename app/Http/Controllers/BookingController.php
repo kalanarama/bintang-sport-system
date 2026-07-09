@@ -30,8 +30,21 @@ class BookingController extends Controller
         $request->validate([
             'jadwal_id'      => 'required|exists:jadwal,id',
             'nama_pelanggan' => 'required|string|max:255',
-            'nomor_hp'       => 'required|string|min:10|max:15',
+            'nomor_hp'       => 'required|string',
+        ], [
+            'jadwal_id.required'      => 'Jadwal wajib dipilih.',
+            'jadwal_id.exists'        => 'Jadwal tidak ditemukan.',
+            'nama_pelanggan.required' => 'Nama lengkap wajib diisi.',
+            'nomor_hp.required'       => 'Nomor WhatsApp wajib diisi.',
         ]);
+
+        $nomorBersih = preg_replace('/\s+/', '', $request->nomor_hp);
+
+        if (strlen($nomorBersih) < 10 || strlen($nomorBersih) > 15) {
+            return back()->withErrors([
+                'nomor_hp' => 'Nomor WhatsApp minimal 10 digit dan maksimal 15 digit.',
+            ])->withInput();
+        }
 
         $jadwal = Jadwal::with('lapangan')->findOrFail($request->jadwal_id);
 
@@ -51,7 +64,7 @@ class BookingController extends Controller
             : $harga;
 
         $pelanggan = Pelanggan::firstOrCreate(
-            ['nomor_hp' => $request->nomor_hp],
+            ['nomor_hp' => $nomorBersih],
             ['nama_pelanggan' => $request->nama_pelanggan]
         );
 
@@ -68,26 +81,46 @@ class BookingController extends Controller
         return redirect()->route('pembayaran.show', $booking->id);
     }
 
-
-    public function cek() {
-        return view('pelanggan.riwayat');
+    public function cek()
+    {
+        return view('pelanggan.booking.riwayat');
     }
+
     public function cekStatus(Request $request)
     {
         $request->validate([
-            'nomor_hp' => 'required|string|min:10|max:15',
+            'nomor_hp' => 'required|string',
+        ], [
+            'nomor_hp.required' => 'Nomor WhatsApp wajib diisi.',
         ]);
 
-        $pelanggan = Pelanggan::where('nomor_hp', $request->nomor_hp)->first();
+        $nomorBersih = preg_replace('/\s+/', '', $request->nomor_hp);
+
+        if (strlen($nomorBersih) < 10 || strlen($nomorBersih) > 15) {
+            return back()->withErrors([
+                'nomor_hp' => 'Nomor WhatsApp minimal 10 digit dan maksimal 15 digit.',
+            ])->withInput();
+        }
+
+        $pelanggan = Pelanggan::where('nomor_hp', $nomorBersih)->first();
 
         if (!$pelanggan) {
-            return back()->withErrors(['nomor_hp' => 'Data booking tidak ditemukan.']);
+            return back()->withErrors([
+                'nomor_hp' => 'Data booking tidak ditemukan.',
+            ])->withInput();
         }
 
         $bookings = Booking::with(['jadwal.lapangan', 'pembayaran'])
             ->where('pelanggan_id', $pelanggan->id)
             ->latest()
             ->get();
+
+        // Tambahan: handle jika pelanggan ada tapi belum punya booking
+        if ($bookings->isEmpty()) {
+            return back()->withErrors([
+                'nomor_hp' => 'Data booking tidak ditemukan.',
+            ])->withInput();
+        }
 
         return view('pelanggan.booking.status', compact('bookings'));
     }
