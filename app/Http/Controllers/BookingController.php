@@ -18,11 +18,37 @@ class BookingController extends Controller
 
     public function create()
     {
-        $jadwals = Jadwal::with('lapangan')
-            ->where('status_jadwal', 'Tersedia')
+        $jadwals = Jadwal::with(['lapangan.promos'])
             ->where('tanggal_jadwal', '>=', now()->toDateString())
             ->get();
-        return view('pelanggan.booking.create', compact('jadwals'));
+
+        $jadwalData = $jadwals->map(function ($jadwal) {
+            $promo = $jadwal->lapangan->promos
+                ->where('status_promo', true)
+                ->where('tanggal_mulai', '<=', $jadwal->tanggal_jadwal)
+                ->where('tanggal_berakhir', '>=', $jadwal->tanggal_jadwal)
+                ->first();
+
+            $harga = $jadwal->lapangan->harga_lapangan;
+            $hargaPromo = $promo
+                ? $harga - ($harga * $promo->diskon_persen / 100)
+                : null;
+
+            return [
+                'id'            => $jadwal->id,
+                'lapangan_id'   => $jadwal->lapangan_id,
+                'nama_lapangan' => $jadwal->lapangan->nama_lapangan,
+                'tanggal'       => $jadwal->tanggal_jadwal,
+                'jam_mulai'     => $jadwal->jam_mulai,
+                'jam_selesai'   => $jadwal->jam_selesai,
+                'status'        => $jadwal->status_jadwal,
+                'harga'         => $harga,
+                'ada_promo'     => $promo ? true : false,
+                'harga_promo'   => $hargaPromo,
+            ];
+        });
+
+        return view('pelanggan.booking.create', compact('jadwals', 'jadwalData'));
     }
 
     public function store(Request $request)
@@ -115,7 +141,6 @@ class BookingController extends Controller
             ->latest()
             ->get();
 
-        // Tambahan: handle jika pelanggan ada tapi belum punya booking
         if ($bookings->isEmpty()) {
             return back()->withErrors([
                 'nomor_hp' => 'Data booking tidak ditemukan.',
