@@ -154,4 +154,13 @@ class LapanganController extends Controller
         return redirect()->route('admin.lapangan.index')
             ->with('success', 'Data lapangan berhasil dihapus');
     }
+
+    public function public()
+    {
+        $lapangans = Lapangan::orderBy('jenis_lapangan')
+                        ->orderBy('nama_lapangan')
+                        ->get();
+
+        return view('pelanggan.jadwal.index', compact('lapangans'));
+    }
 }
