@@ -43,7 +43,7 @@ Route::get('/syarat-ketentuan', function () {
     return view('pelanggan.syarat');
 })->name('syarat');
 
-Route::get('/jadwal', [JadwalController::class, 'public'])->name('jadwal.public');
+Route::get('/jadwal', [LapanganController::class, 'public'])->name('jadwal.public');
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/cek-status', [BookingController::class, 'cek'])->name('booking.cek');
