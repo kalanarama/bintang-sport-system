@@ -155,12 +155,14 @@ class LapanganController extends Controller
             ->with('success', 'Data lapangan berhasil dihapus');
     }
 
-    public function public()
+    public function public(Request $request)
     {
         $lapangans = Lapangan::orderBy('jenis_lapangan')
                         ->orderBy('nama_lapangan')
                         ->get();
 
-        return view('pelanggan.jadwal.index', compact('lapangans'));
+        $kategori = strtolower($request->query('kategori', 'all'));
+
+        return view('pelanggan.jadwal.index', compact('lapangans', 'kategori'));
     }
 }

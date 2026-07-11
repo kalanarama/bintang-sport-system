@@ -203,11 +203,12 @@
             border: 1px solid #d9e7ff;
             border-radius: 10px;
             box-shadow: 0 3px 10px rgba(0, 82, 204, 0.12);
-            transition: 0.2s;
+            transition:.3s;
+            border:1px solid #d9e7ff;
         }
 
         .lapangan-card:hover {
-            transform: translateY(-6px);
+            border-color:#0d5be1;
             box-shadow: 0 9px 20px rgba(0, 82, 204, 0.18);
         }
 
@@ -576,14 +577,18 @@
                     <img src="{{ asset('img/futsal-a01.png') }}" alt="Futsal A">
                     <h3><i class="fa-regular fa-futbol"></i> Futsal A</h3>
                     <p>Lapangan rumput sintetis berkualitas dengan pencahayaan indoor yang terang.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
+                    <a href="{{ route('jadwal.public', ['kategori' => 'futsal']) }}" class="btn-jadwal">
+                        Lihat Jadwal
+                    </a>
                 </article>
 
                 <article class="lapangan-card reveal">
                     <img src="{{ asset('img/futsal-b.png') }}" alt="Futsal B">
                     <h3><i class="fa-regular fa-futbol"></i> Futsal B</h3>
                     <p>Lapangan indoor dengan suasana yang nyaman dan lapangan yang terawat.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
+                <a href="{{ route('jadwal.public', ['kategori' => 'futsal']) }}" class="btn-jadwal">
+                    Lihat Jadwal
+                </a>
                 </article>
 
                 <article class="lapangan-card reveal">
@@ -594,14 +599,18 @@
                         Badminton
                     </h3>
                     <p>Lapangan badminton yang terawat dengan net standar berkualitas.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
+                    <a href="{{ route('jadwal.public', ['kategori' => 'badminton']) }}" class="btn-jadwal">
+                        Lihat Jadwal
+                    </a>
                 </article>
 
                 <article class="lapangan-card reveal">
                     <img src="{{ asset('img/basket.png') }}" alt="Basket">
                     <h3><i class="fa-solid fa-basketball"></i> Basket</h3>
                     <p>Lapangan basket indoor yang nyaman dengan garis lapangan yang jelas.</p>
-                    <a href="{{ url('/lapangan') }}" class="btn-jadwal">Selengkapnya</a>
+                    <a href="{{ route('jadwal.public', ['kategori' => 'basket']) }}" class="btn-jadwal">
+                        Lihat Jadwal
+                    </a>
                 </article>
             </div>
         </section>

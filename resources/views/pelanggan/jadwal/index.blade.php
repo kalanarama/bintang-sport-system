@@ -112,47 +112,6 @@
             margin-bottom: 45px;
         }
 
-        .kategori{
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            background:#eef5ff;
-            color:#0d5be1;
-            padding:8px 18px;
-            border-radius:50px;
-            font-size:14px;
-            font-weight:600;
-            margin-bottom:18px;
-        }
-
-        .card-body{
-            padding:25px;
-            text-align:left;
-        }
-
-        .card-body h2{
-            font-size:28px;
-            margin-bottom:15px;
-        }
-
-        .price{
-            font-size:22px;
-            color:#0d5be1;
-            font-weight:700;
-            margin-bottom:25px;
-        }
-
-        .btn-detail{
-            display:block;
-            width:100%;
-            text-align:center;
-            padding:15px;
-            border-radius:12px;
-            background:#0d5be1;
-            color:white;
-            font-weight:700;
-        }
-
         /* filter */
         .filter-btn i{
             margin-right:8px;
@@ -173,27 +132,34 @@
         }
 
         .kategori-btn{
-            border:none;
-            background:#edf4ff;
+            border:1.5px solid #d4e4ff;
+            background:#ffffff;
             color:#0d5be1;
             padding:12px 28px;
             border-radius:40px;
             font-weight:600;
             cursor:pointer;
-            transition:.3s;
+            transition:all .3s ease;
+            box-shadow:0 2px 8px rgba(13,91,225,.06);
         }
 
-        .kategori-btn.active,
         .kategori-btn:hover{
+            border-color:#0d5be1;
+            background:#f5f9ff;
+        }
+
+        .kategori-btn.active{
             background:#0d5be1;
+            border-color:#0d5be1;
             color:white;
+            box-shadow:0 6px 18px rgba(13,91,225,.25);
         }
 
         /* Grid */
         .lapangan-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-            gap:35px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
         }
 
         /* Card */
@@ -210,7 +176,7 @@
         }
 
         .card-image{
-            height:220px;
+            height:170px;
             overflow:hidden;
             position:relative;
         }
@@ -222,20 +188,20 @@
         }
 
         .card-body{
-            padding:24px;
+            padding:18px;
             text-align:center;
         }
 
         .card-body h2{
-            font-size:34px;
+            font-size:24px;
             margin-bottom:12px;
         }
 
         .price{
             color:#0d5be1;
-            font-size:23px;
+            font-size:18px;
             font-weight:700;
-            margin-bottom:22px;
+            margin-bottom:16px;
         }
 
         .price i{
@@ -246,7 +212,8 @@
             display:inline-block;
             background:#0d5be1;
             color:white;
-            padding:14px 40px;
+            padding:12px 20px;
+            width: 100%;
             border-radius:12px;
             font-weight:700;
             transition:.3s;
@@ -256,6 +223,18 @@
             background:#0047bd;
         }
 
+        .kategori{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:#eef5ff;
+            color:#0d5be1;
+            padding:6px 14px;
+            border-radius:50px;
+            font-size:13px;
+            font-weight:600;
+            margin-bottom:18px;
+        }
 
         .card.nonaktif{
             opacity:.65;
@@ -355,6 +334,21 @@
 
         }
 
+        /* Tablet */
+        @media (max-width: 992px){
+            .lapangan-grid{
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* HP */
+        @media (max-width: 576px){
+            .lapangan-grid{
+                grid-template-columns: 1fr;
+            }
+        }
+
+
     </style>
 </head>
 
@@ -393,21 +387,26 @@
                 Semua
             </button>
 
-            @foreach($lapangans->pluck('jenis_lapangan')->unique() as $jenis)
+            <button class="kategori-btn" data-filter="futsal">
+                Futsal
+            </button>
 
-                <button
-                    class="kategori-btn"
-                    data-filter="{{ strtolower($jenis) }}">
+            <button class="kategori-btn" data-filter="badminton">
+                Badminton
+            </button>
 
-                    {{ $jenis }}
-
-                </button>
-
-            @endforeach
+            <button class="kategori-btn" data-filter="basket">
+                Basket
+            </button>
 
         </div>
 
             <div class="lapangan-grid">
+
+            <div id="empty-message" style="display:none; text-align:center; padding:40px;">
+                <h3>Tidak ada jadwal</h3>
+                <p>Belum ada lapangan pada kategori ini.</p>
+            </div>
 
             @forelse($lapangans as $item)
 
@@ -462,7 +461,7 @@
                     @if($item->status_lapangan=='aktif')
 
                     <a href="#" class="btn-detail">
-                        Lihat Jadwal
+                        Selengkapnya
                     </a>
 
                     @else
@@ -523,31 +522,48 @@
 
 <!-- Javascript Filter -->
     <script>
+        const kategoriAwal = "{{ $kategori ?? 'all' }}";
+        const kategori = document.querySelectorAll(".kategori-btn");
+        const card = document.querySelectorAll(".card");
+        const emptyMessage = document.getElementById("empty-message");
 
-        const kategori=document.querySelectorAll(".kategori-btn");
-        const card=document.querySelectorAll(".card");
+        kategori.forEach(btn => {
 
-        kategori.forEach(btn=>{
+            btn.onclick = function () {
 
-            btn.onclick=function(){
-
-                kategori.forEach(x=>x.classList.remove("active"));
+                kategori.forEach(x => x.classList.remove("active"));
                 this.classList.add("active");
 
-                let filter=this.dataset.filter;
+                const filter = this.dataset.filter;
+                let adaData = false;
 
-                card.forEach(item=>{
+                card.forEach(item => {
 
-                    if(filter=="all"){
-                        item.style.display="block";
-                    }else{
-
-                        item.style.display=
-                        item.dataset.category==filter
-                        ?"block":"none";
+                    if (filter === "all" || item.dataset.category === filter) {
+                        item.style.display = "block";
+                        adaData = true;
+                    } else {
+                        item.style.display = "none";
                     }
+
                 });
+
+                emptyMessage.style.display = adaData ? "none" : "block";
+
             }
+
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+
+            const btn = document.querySelector(
+                `.kategori-btn[data-filter="${kategoriAwal}"]`
+            );
+
+            if (btn) {
+                btn.click();
+            }
+
         });
     </script>
 </body>

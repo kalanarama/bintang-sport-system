@@ -411,7 +411,7 @@
                         </span>
                     </div>
 
-                    <a href="{{ route('jadwal.public') }}" class="btn-lihat-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'futsal']) }}" class="btn-lihat-jadwal">
                         Lihat Jadwal
                     </a>
                 </div>
@@ -450,7 +450,7 @@
                         </span>
                     </div>
 
-                    <a href="{{ route('jadwal.public') }}" class="btn-lihat-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'futsal']) }}" class="btn-lihat-jadwal">
                         Lihat Jadwal
                     </a>
                 </div>
@@ -493,7 +493,7 @@
                         </span>
                     </div>
 
-                    <a href="{{ route('jadwal.public') }}" class="btn-lihat-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'badminton']) }}" class="btn-lihat-jadwal">
                         Lihat Jadwal
                     </a>
                 </div>
@@ -532,7 +532,7 @@
                         </span>
                     </div>
 
-                    <a href="{{ route('jadwal.public') }}" class="btn-lihat-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'basket']) }}" class="btn-lihat-jadwal">
                         Lihat Jadwal
                     </a>
                 </div>
