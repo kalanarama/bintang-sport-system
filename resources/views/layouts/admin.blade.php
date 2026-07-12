@@ -493,6 +493,10 @@
     </div>
 
     <div class="page-content">
+        <div style="display: flex; align-items: center; justify-content: flex-end; font-size: 13px; color: #64748b; font-weight: 500;">
+            <i class="fas fa-calendar-alt" style="color: #1565C0; margin-right: 6px;"></i>
+            <span id="topbarDate"></span>
+        </div>
         @yield('content')
     </div>
 </div>
@@ -530,6 +534,23 @@
             }
         });
     }
+</script>
+
+<script>
+function updateDateTime() {
+    const now = new Date();
+    const bulan = ['Januari','Februari','Maret','April','Mei','Juni',
+                   'Juli','Agustus','September','Oktober','November','Desember'];
+    const tgl = now.getDate();
+    const bln = bulan[now.getMonth()].toUpperCase();
+    const thn = now.getFullYear();
+    const jam = String(now.getHours()).padStart(2,'0');
+    const mnt = String(now.getMinutes()).padStart(2,'0');
+    const dtk = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('topbarDate').textContent = `${tgl} ${bln} ${thn} ${jam}:${mnt}:${dtk}`;
+}
+updateDateTime();
+setInterval(updateDateTime, 1000);
 </script>
 @stack('scripts')
 </body>
