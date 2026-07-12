@@ -9,6 +9,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\LaporanRekapitulasiController;
+use App\Http\Controllers\DashboardController;
 
 // =====================
 // REDIRECT ROOT PAGE
@@ -60,9 +61,7 @@ Route::get('/pembayaran/{bookingId}/sukses', [PembayaranController::class, 'suks
 Route::middleware(['auth.admin'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Lapangan
     Route::resource('lapangan', LapanganController::class);
