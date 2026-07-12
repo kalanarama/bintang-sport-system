@@ -10,7 +10,7 @@ class Booking extends Model
     protected $fillable = [
         'jadwal_id', 'pelanggan_id',
         'jam_mulai', 'jam_selesai', 'total_bayar',
-        'status', 'kode_booking'
+        'status', 'kode_booking', 'qris_string', 'qris_request_id', 'qris_expired_at',
     ];
 
     public function jadwal()

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LapanganController;
 use App\Http\Controllers\JadwalController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\LaporanRekapitulasiController;
 use App\Http\Controllers\DashboardController;
+
 
 // =====================
 // REDIRECT ROOT PAGE
@@ -54,6 +56,8 @@ Route::post('/cek-status', [BookingController::class, 'cekStatus'])->name('booki
 Route::get('/pembayaran/{bookingId}', [PembayaranController::class, 'show'])->name('pembayaran.show');
 Route::post('/pembayaran/{bookingId}/proses', [PembayaranController::class, 'proses'])->name('pembayaran.proses');
 Route::get('/pembayaran/{bookingId}/sukses', [PembayaranController::class, 'sukses'])->name('pembayaran.sukses');
+Route::get('/pembayaran/{bookingId}/simulasi', [PembayaranController::class, 'simulasi'])->name('pembayaran.simulasi');
+Route::post('/xendit/webhook', [PembayaranController::class, 'webhook']);
 
 // =====================
 // ADMIN (wajib login)
@@ -89,3 +93,4 @@ Route::middleware(['auth.admin'])->prefix('admin')->name('admin.')->group(functi
 Route::get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->name('dashboard');
+
