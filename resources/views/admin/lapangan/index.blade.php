@@ -3,12 +3,12 @@
 @section('title', 'Kelola Lapangan')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-start">
+<div class="page-header d-flex align-items-start justify-content-between">
     <div>
         <h1>Kelola Lapangan</h1>
         <p>Kelola data lapangan yang tersedia di Bintang Sport Center.</p>
     </div>
-    <a href="{{ route('admin.lapangan.create') }}" class="btn-primary-custom">
+    <a href="{{ route('admin.lapangan.create') }}" class="btn-primary-custom" style="margin-top: 20px;">
         <i class="fas fa-plus"></i> Tambah Lapangan
     </a>
 </div>
