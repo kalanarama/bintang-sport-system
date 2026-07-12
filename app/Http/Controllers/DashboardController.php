@@ -47,7 +47,7 @@ class DashboardController extends Controller
         // Booking terbaru
         $bookingTerbaru = Booking::with(['jadwal.lapangan', 'pelanggan'])
             ->latest()
-            ->take(5)
+            ->take(10)
             ->get();
 
         return view('admin.dashboard', compact(
