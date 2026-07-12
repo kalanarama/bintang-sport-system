@@ -49,8 +49,8 @@
                     <td>{{ $lapangans->firstItem() + $index }}</td>
                     <td>
                         @if($lapangan->foto_lapangan)
-                            <img src="{{ asset($lapangan->foto_lapangan) }}"
-                                alt="Foto" style="width:60px; height:50px; object-fit:cover; border-radius:8px;">
+                           <img src="{{ asset($lapangan->foto_lapangan) }}"
+                                 alt="Foto" style="width:80px; height:60px; object-fit:cover; border-radius:8px;">
                         @else
                             <div style="width:60px; height:50px; background:#f0f4ff; border-radius:8px;
                                 display:flex; align-items:center; justify-content:center; color:#94a3b8;">

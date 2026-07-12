@@ -16,7 +16,7 @@
 @endpush
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-start">
+<div class="page-header d-flex justify-content-between align-items-start" style="padding-top: 12px;">
     <div>
         <h1>Detail Lapangan</h1>
         <p>Informasi lengkap data lapangan.</p>

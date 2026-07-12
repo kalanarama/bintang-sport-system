@@ -26,8 +26,10 @@
         <div class="mb-3">
             <label class="form-label">Jenis Lapangan</label>
             <select name="jenis_lapangan" class="form-select @error('jenis_lapangan') is-invalid @enderror">
+                <option value="">Pilih Jenis</option>
+                <option value="Futsal A" {{ old('jenis_lapangan', $lapangan->jenis_lapangan) == 'Futsal A' ? 'selected' : '' }}>Futsal A</option>
+                <option value="Futsal B" {{ old('jenis_lapangan', $lapangan->jenis_lapangan) == 'Futsal B' ? 'selected' : '' }}>Futsal B</option>
                 <option value="Badminton" {{ old('jenis_lapangan', $lapangan->jenis_lapangan) == 'Badminton' ? 'selected' : '' }}>Badminton</option>
-                <option value="Futsal" {{ old('jenis_lapangan', $lapangan->jenis_lapangan) == 'Futsal' ? 'selected' : '' }}>Futsal</option>
                 <option value="Basket" {{ old('jenis_lapangan', $lapangan->jenis_lapangan) == 'Basket' ? 'selected' : '' }}>Basket</option>
             </select>
             @error('jenis_lapangan')
@@ -76,9 +78,7 @@
             <label class="form-label">Durasi Slot</label>
             <select name="durasi_slot" class="form-select @error('durasi_slot') is-invalid @enderror">
                 <option value="">Pilih Durasi</option>
-                <option value="30" {{ old('durasi_slot', $lapangan->durasi_slot) == '30' ? 'selected' : '' }}>30 Menit</option>
                 <option value="60" {{ old('durasi_slot', $lapangan->durasi_slot) == '60' ? 'selected' : '' }}>60 Menit</option>
-                <option value="90" {{ old('durasi_slot', $lapangan->durasi_slot) == '90' ? 'selected' : '' }}>90 Menit</option>
                 <option value="120" {{ old('durasi_slot', $lapangan->durasi_slot) == '120' ? 'selected' : '' }}>120 Menit</option>
             </select>
             @error('durasi_slot')

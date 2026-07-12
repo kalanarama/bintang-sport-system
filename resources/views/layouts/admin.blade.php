@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <title>@yield('title', 'Admin') - Bintang Sport Center</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,6 +14,7 @@
             background: #f0f4ff;
             display: flex;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .sidebar {
@@ -191,6 +190,8 @@
             flex-direction: column;
             min-height: 100vh;
             transition: margin-left 0.3s ease;
+            overflow-x: hidden;
+            min-width: 0; 
         }
 
         .main-content.collapsed { margin-left: 70px; }
@@ -420,6 +421,14 @@
             text-decoration: none;
         }
         .btn-detail:hover { background: #e65100; color: white; }
+
+        .jadwal-table-wrap {
+            scrollbar-width: none; 
+        }
+
+        .jadwal-table-wrap::-webkit-scrollbar {
+            display: none; 
+        }
     </style>
     @stack('styles')
 </head>
@@ -501,7 +510,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const toggleBtn = document.getElementById('toggleSidebar');
     const sidebar = document.getElementById('sidebar');

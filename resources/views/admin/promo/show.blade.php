@@ -61,12 +61,13 @@
 @endpush
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-start">
-    <div>
-        <h1>Detail Promo</h1>
-        <p>Informasi lengkap data promo.</p>
-    </div>
-    <div class="d-flex gap-2">
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1>Detail Promo</h1>
+            <p>Informasi lengkap data promo.</p>
+        </div>
+        <div class="d-flex gap-2" style="margin-top: 10px; margin-bottom: 10px;">
         <a href="{{ route('admin.promo.edit', $promo->id) }}" class="btn-primary-custom">
             <i class="fas fa-pen-to-square"></i> Edit
         </a>

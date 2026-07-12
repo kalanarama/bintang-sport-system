@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jadwal;
 use App\Models\Lapangan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 class LapanganController extends Controller
 {
@@ -30,11 +32,11 @@ class LapanganController extends Controller
 
         $request->validate([
             'nama_lapangan'   => 'required|string|max:255',
-            'jenis_lapangan'  => 'required|in:Badminton,Futsal,Basket',
+            'jenis_lapangan'  => 'required|in:Badminton,Futsal A,Futsal B,Basket',
             'harga_lapangan'  => 'required|numeric|min:1',
             'jam_buka'        => 'required|date_format:H:i',
             'jam_tutup'       => 'required|date_format:H:i|after:jam_buka',
-            'durasi_slot'     => 'required|in:30,60,90,120',
+            'durasi_slot'     => 'required|in:60,120',
             'foto_lapangan'   => 'required|image|mimes:jpg,jpeg,png|max:5120',
             'status_lapangan' => 'required|in:aktif,nonaktif',
         ], [
@@ -64,15 +66,19 @@ class LapanganController extends Controller
 
         if ($request->hasFile('foto_lapangan')) {
             $extension = $request->file('foto_lapangan')->getClientOriginalExtension();
-            $filename = time() . '.' . $extension;
+            $filename  = time() . '.' . $extension;
             $request->file('foto_lapangan')->move(public_path('img/lapangan'), $filename);
             $data['foto_lapangan'] = 'img/lapangan/' . $filename;
         }
 
-        Lapangan::create($data);
+        $lapangan = Lapangan::create($data);
+
+        if ($lapangan->status_lapangan === 'aktif') {
+            $this->generateJadwal($lapangan);
+        }
 
         return redirect()->route('admin.lapangan.index')
-            ->with('success', 'Data lapangan berhasil disimpan');
+            ->with('success', 'Data lapangan berhasil disimpan dan jadwal telah digenerate.');
     }
 
     public function show(Lapangan $lapangan)
@@ -96,11 +102,11 @@ class LapanganController extends Controller
 
         $request->validate([
             'nama_lapangan'   => 'required|string|max:255',
-            'jenis_lapangan'  => 'required|in:Badminton,Futsal,Basket',
+            'jenis_lapangan' => 'required|in:Badminton,Futsal A,Futsal B,Basket',
             'harga_lapangan'  => 'required|numeric|min:1',
             'jam_buka'        => 'required|date_format:H:i',
             'jam_tutup'       => 'required|date_format:H:i|after:jam_buka',
-            'durasi_slot'     => 'required|in:30,60,90,120',
+            'durasi_slot'     => 'required|in:60,120',
             'foto_lapangan'   => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'status_lapangan' => 'required|in:aktif,nonaktif',
         ], [
@@ -122,6 +128,14 @@ class LapanganController extends Controller
             'status_lapangan.required' => 'Status lapangan wajib dipilih.',
         ]);
 
+        // Cek perubahan SEBELUM update
+        $jadwalBerubah = $lapangan->jam_buka !== $request->jam_buka
+            || $lapangan->jam_tutup !== $request->jam_tutup
+            || (int)$lapangan->durasi_slot !== (int)$request->durasi_slot;
+
+        $statusLama = $lapangan->status_lapangan;
+        $statusBaru = $request->status_lapangan;
+
         $data = $request->only([
             'nama_lapangan', 'jenis_lapangan', 'harga_lapangan',
             'jam_buka', 'jam_tutup', 'durasi_slot', 'status_lapangan'
@@ -132,15 +146,37 @@ class LapanganController extends Controller
                 File::delete(public_path($lapangan->foto_lapangan));
             }
             $extension = $request->file('foto_lapangan')->getClientOriginalExtension();
-            $filename = time() . '.' . $extension;
+            $filename  = time() . '.' . $extension;
             $request->file('foto_lapangan')->move(public_path('img/lapangan'), $filename);
             $data['foto_lapangan'] = 'img/lapangan/' . $filename;
         }
 
         $lapangan->update($data);
 
+        // Kalau dinonaktifkan: hapus jadwal Tersedia ke depan
+        if ($statusLama === 'aktif' && $statusBaru === 'nonaktif') {
+            Jadwal::where('lapangan_id', $lapangan->id)
+                ->where('status_jadwal', 'Tersedia')
+                ->where('tanggal_jadwal', '>=', now()->toDateString())
+                ->delete();
+        }
+
+        // Kalau diaktifkan kembali: generate jadwal lagi
+        elseif ($statusLama === 'nonaktif' && $statusBaru === 'aktif') {
+            $this->generateJadwal($lapangan);
+        }
+
+        // Kalau tetap aktif tapi jam/durasi berubah: hapus Tersedia ke depan lalu generate ulang
+        elseif ($statusBaru === 'aktif' && $jadwalBerubah) {
+            Jadwal::where('lapangan_id', $lapangan->id)
+                ->where('status_jadwal', 'Tersedia')
+                ->where('tanggal_jadwal', '>=', now()->toDateString())
+                ->delete();
+            $this->generateJadwal($lapangan);
+        }
+
         return redirect()->route('admin.lapangan.index')
-            ->with('success', 'Data lapangan berhasil diperbarui');
+            ->with('success', 'Data lapangan berhasil diperbarui.');
     }
 
     public function destroy(Lapangan $lapangan)
@@ -148,6 +184,11 @@ class LapanganController extends Controller
         if ($lapangan->foto_lapangan && File::exists(public_path($lapangan->foto_lapangan))) {
             File::delete(public_path($lapangan->foto_lapangan));
         }
+
+        Jadwal::where('lapangan_id', $lapangan->id)
+            ->where('status_jadwal', 'Tersedia')
+            ->where('tanggal_jadwal', '>=', now()->toDateString())
+            ->delete();
 
         $lapangan->delete();
 
@@ -164,5 +205,44 @@ class LapanganController extends Controller
         $kategori = strtolower($request->query('kategori', 'all'));
 
         return view('pelanggan.jadwal.index', compact('lapangans', 'kategori'));
+    }
+    public function generateJadwal(Lapangan $lapangan)
+    {
+        $tanggalMulai = Carbon::today();
+        $tanggalAkhir = Carbon::today()->addMonths(6);
+        $durasi       = (int) $lapangan->durasi_slot;
+        $jamBuka      = Carbon::parse($lapangan->jam_buka);
+        $jamTutup     = Carbon::parse($lapangan->jam_tutup);
+        $now          = now();
+        $batch        = [];
+
+        for ($date = $tanggalMulai->copy(); $date->lte($tanggalAkhir); $date->addDay()) {
+            $jamMulai = $jamBuka->copy();
+
+            while ($jamMulai->copy()->addMinutes($durasi)->lte($jamTutup)) {
+                $jamSelesai = $jamMulai->copy()->addMinutes($durasi);
+
+                $batch[] = [
+                    'lapangan_id'    => $lapangan->id,
+                    'tanggal_jadwal' => $date->toDateString(),
+                    'jam_mulai'      => $jamMulai->format('H:i'),
+                    'jam_selesai'    => $jamSelesai->format('H:i'),
+                    'status_jadwal'  => 'Tersedia',
+                    'created_at'     => $now,
+                    'updated_at'     => $now,
+                ];
+
+                $jamMulai->addMinutes($durasi);
+            }
+
+            if (count($batch) >= 500) {
+                Jadwal::insertOrIgnore($batch);
+                $batch = [];
+            }
+        }
+
+        if (!empty($batch)) {
+            Jadwal::insertOrIgnore($batch);
+        }
     }
 }

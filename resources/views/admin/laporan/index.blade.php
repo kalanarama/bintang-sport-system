@@ -188,7 +188,6 @@
 </div>
 
 </form>
-</div>
 
 
 
@@ -275,12 +274,12 @@
 
         <tr>
 
-            <td colspan="7"
+           <td colspan="7"
                 class="text-center py-4"
                 style="color:#94a3b8;">
 
                 <i class="fas fa-file-alt mb-2"
-                   style="font-size:32px;display:block;"></i>
+               style="font-size:32px;display:block;margin:0 auto;width:fit-content;"></i>
 
                 Belum ada data laporan
 

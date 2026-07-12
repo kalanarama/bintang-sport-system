@@ -3,16 +3,17 @@
 @section('title', 'Edit Promo')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-start">
-    <div>
-        <h1>Edit Promo</h1>
-        <p>Ubah data promo yang sudah ada.</p>
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1>Edit Promo</h1>
+            <p>Ubah data promo yang sudah ada.</p>
+        </div>
+        <a href="{{ route('admin.promo.index') }}" class="btn btn-light px-4 rounded-3" style="margin-top: 20px;">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
     </div>
-    <a href="{{ route('admin.promo.index') }}" class="btn btn-light px-4 rounded-3">
-        <i class="fas fa-arrow-left"></i> Kembali
-    </a>
 </div>
-
 <div class="card-custom" style="padding: 28px;">
     <form action="{{ route('admin.promo.update', $promo->id) }}" method="POST" id="formEdit">
         @csrf

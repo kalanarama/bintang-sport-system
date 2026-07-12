@@ -110,6 +110,40 @@
 @endpush
 
 @section('content')
+@if(session('success'))
+<div id="alertSuccess" style="
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    background: #ecfdf5;
+    border: 1.5px solid #34d399;
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(52,211,153,0.2);
+    animation: slideIn 0.3s ease;
+">
+    <i class="fas fa-circle-check" style="color:#10b981;font-size:18px;"></i>
+    <span style="font-size:14px;font-weight:600;color:#065f46;">{{ session('success') }}</span>
+</div>
+
+<style>
+@keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+</style>
+
+<script>
+setTimeout(() => {
+    const el = document.getElementById('alertSuccess');
+    if (el) el.style.display = 'none';
+}, 3000);
+</script>
+@endif
 
 <div class="page-header">
     <h1>Dashboard</h1>

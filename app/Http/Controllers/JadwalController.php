@@ -8,67 +8,37 @@ use Illuminate\Http\Request;
 
 class JadwalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jadwals = Jadwal::with('lapangan')->get();
-        return view('admin.jadwal.index', compact('jadwals'));
-    }
+        $tanggal    = $request->tanggal ?? now()->toDateString();
+        $lapanganId = $request->lapangan_id ?? null;
 
-    public function create()
-    {
-        $lapangans = Lapangan::where('status_lapangan', 'aktif')->get(); 
-        return view('admin.jadwal.create', compact('lapangans'));
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'lapangan_id'    => 'required|exists:lapangan,id',
-            'tanggal_jadwal' => 'required|date|after_or_equal:today',
-            'jam_mulai'      => 'required',
-            'jam_selesai'    => 'required|after:jam_mulai',
-        ]);
-
-        Jadwal::create([
-            'lapangan_id'    => $request->lapangan_id,
-            'tanggal_jadwal' => $request->tanggal_jadwal,
-            'jam_mulai'      => $request->jam_mulai,
-            'jam_selesai'    => $request->jam_selesai,
-            'status_jadwal' => 'Tersedia', 
-        ]);
-
-        return redirect()->route('jadwal.index')
-            ->with('success', 'Jadwal berhasil disimpan');
-    }
-
-    public function edit(Jadwal $jadwal)
-    {
         $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
-        return view('admin.jadwal.edit', compact('jadwal', 'lapangans'));
-    }
 
-    public function update(Request $request, Jadwal $jadwal)
-    {
-        $request->validate([
-            'lapangan_id'    => 'required|exists:lapangan,id',
-            'tanggal_jadwal' => 'required|date',
-            'jam_mulai'      => 'required',
-            'jam_selesai'    => 'required|after:jam_mulai',
-        ]);
+        $jadwals = Jadwal::with(['lapangan.promos', 'bookings.pelanggan'])
+            ->where('tanggal_jadwal', $tanggal)
+            ->when($lapanganId, fn($q) => $q->where('lapangan_id', $lapanganId))
+            ->orderBy('jam_mulai')
+            ->get();
 
-        $jadwal->update($request->only([
-            'lapangan_id', 'tanggal_jadwal', 'jam_mulai', 'jam_selesai', 'status_jadwal'
-        ]));
+        $jadwalByLapangan = $jadwals->groupBy('lapangan_id');
 
-        return redirect()->route('jadwal.index')
-            ->with('success', 'Jadwal berhasil diperbarui');
+        return view('admin.jadwal.index', compact(
+            'jadwals', 'lapangans', 'jadwalByLapangan', 'tanggal', 'lapanganId'
+        ));
     }
 
     public function destroy(Jadwal $jadwal)
     {
+        if ($jadwal->status_jadwal === 'Penuh') {
+            return redirect()->route('admin.jadwal.index')
+                ->with('error', 'Slot yang sudah dipesan tidak bisa dihapus.');
+        }
+
         $jadwal->delete();
-        return redirect()->route('jadwal.index')
-            ->with('success', 'Jadwal berhasil dihapus');
+
+        return redirect()->route('admin.jadwal.index')
+            ->with('success', 'Slot jadwal berhasil dihapus.');
     }
 
     public function public()
@@ -77,6 +47,7 @@ class JadwalController extends Controller
             ->where('tanggal_jadwal', '>=', now()->toDateString())
             ->orderBy('tanggal_jadwal')
             ->get();
+
         return view('pelanggan.jadwal.index', compact('jadwals'));
     }
 }

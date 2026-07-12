@@ -44,7 +44,8 @@ class AuthController extends Controller
         // Login berhasil
         Auth::guard('admin')->login($admin);
         $request->session()->regenerate();
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Selamat datang kembali, Admin! 👋');
     }
 
     public function logout(Request $request)
