@@ -502,6 +502,7 @@
 
 <script>
 const allJadwals = @json($jadwalData);
+console.log(allJadwals);
 
 @verbatim
 let activeLapanganId = null;
@@ -575,9 +576,24 @@ function renderSlots() {
         grid.innerHTML = '<div class="no-slot">Pilih lapangan dan tanggal untuk melihat slot.</div>';
         return;
     }
-    const slots = allJadwals.filter(j =>
-        j.lapangan_id === activeLapanganId && j.tanggal === activeDate
+
+    console.log("activeLapanganId =", activeLapanganId);
+    console.log("activeDate =", activeDate);
+    console.log(allJadwals);
+    const slots = allJadwals.filter(j => {
+        console.log (
+            "DB:",
+            j.lapangan_id,
+            j.tanggal,
+            "| ACTIVE:",
+            activeLapanganId,
+            activeDate
     );
+
+    return  Number(j.lapangan_id) === Number(activeLapanganId)
+            && String(j.tanggal).trim() === String(activeDate).trim();
+    });
+       
     if (slots.length === 0) {
         grid.innerHTML = '<div class="no-slot">Tidak ada jadwal tersedia pada tanggal ini.</div>';
         return;

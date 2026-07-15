@@ -57,7 +57,7 @@ Route::get('/pembayaran/{bookingId}', [PembayaranController::class, 'show'])->na
 Route::post('/pembayaran/{bookingId}/proses', [PembayaranController::class, 'proses'])->name('pembayaran.proses');
 Route::get('/pembayaran/{bookingId}/sukses', [PembayaranController::class, 'sukses'])->name('pembayaran.sukses');
 Route::get('/pembayaran/{bookingId}/simulasi', [PembayaranController::class, 'simulasi'])->name('pembayaran.simulasi');
-Route::post('/xendit/webhook', [PembayaranController::class, 'webhook']);
+Route::post('/pembayaran/{bookingId}/konfirmasi', [PembayaranController::class, 'konfirmasiManual'])->name('pembayaran.konfirmasi');
 
 // =====================
 // ADMIN (wajib login)

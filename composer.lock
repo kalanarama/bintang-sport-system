@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "58ed703558b17955e492254d9578a374",
+    "content-hash": "fcb92ffccc10bcce607d8ce258595dd7",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6715,66 +6715,6 @@
                 }
             ],
             "time": "2026-04-26T05:33:54+00:00"
-        },
-        {
-            "name": "xendit/xendit-php",
-            "version": "4.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/xendit/xendit-php.git",
-                "reference": "0a9e7a5d5b7a9ccbdd66987aa84457f9bd930a4c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/xendit/xendit-php/zipball/0a9e7a5d5b7a9ccbdd66987aa84457f9bd930a4c",
-                "reference": "0a9e7a5d5b7a9ccbdd66987aa84457f9bd930a4c",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "ext-json": "*",
-                "ext-mbstring": "*",
-                "guzzlehttp/guzzle": "^7.3",
-                "guzzlehttp/psr7": "^1.7 || ^2.0",
-                "php": "^7.4 || ^8.0",
-                "vlucas/phpdotenv": "^5.5"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.5",
-                "phpunit/phpunit": "^8.0 || ^9.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Xendit\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "unlicense"
-            ],
-            "authors": [
-                {
-                    "name": "OpenAPI-Generator contributors",
-                    "homepage": "https://openapi-generator.tech"
-                }
-            ],
-            "description": "Xendit PHP SDK",
-            "homepage": "https://openapi-generator.tech",
-            "keywords": [
-                "api",
-                "openapi",
-                "openapi-generator",
-                "openapitools",
-                "php",
-                "rest",
-                "sdk"
-            ],
-            "support": {
-                "issues": "https://github.com/xendit/xendit-php/issues",
-                "source": "https://github.com/xendit/xendit-php/tree/4.0.0"
-            },
-            "time": "2023-12-01T06:24:46+00:00"
         }
     ],
     "packages-dev": [

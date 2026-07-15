@@ -6,21 +6,17 @@ use App\Models\Booking;
 use App\Models\Pembayaran;
 use App\Models\Notifikasi;
 use App\Models\Jadwal;
+use App\Services\WhatsappService;
 use Illuminate\Http\Request;
-use Xendit\Configuration;
-use Xendit\PaymentRequest\PaymentRequestApi;
-use Xendit\PaymentRequest\PaymentRequestParameters;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class PembayaranController extends Controller
 {
-    public function __construct()
-    {
-        Configuration::setXenditKey(config('services.xendit.secret_key'));
-    }
-
+    /**
+     * Menampilkan halaman pembayaran dengan QRIS statis.
+     */
     public function show($bookingId)
     {
         $booking = Booking::with(['jadwal.lapangan', 'pelanggan'])
@@ -30,111 +26,54 @@ class PembayaranController extends Controller
             return redirect()->route('pembayaran.sukses', $bookingId);
         }
 
-        if (empty($booking->qris_string)) {
-            $this->generateQris($booking);
-        }
-
         return view('pelanggan.pembayaran.show', compact('booking'));
     }
 
-    private function generateQris(Booking $booking)
-    {
-        try {
-            $apiInstance = new PaymentRequestApi();
-
-            $body = new PaymentRequestParameters([
-                'reference_id' => 'BOOKING-' . $booking->id . '-' . time(),
-                'amount'   => (float) $booking->total_bayar,
-                'currency' => 'IDR',
-                'country' => 'ID',
-                'payment_method' => [
-                    'type'        => 'QR_CODE',
-                    'reusability' => 'ONE_TIME_USE',
-                    'qr_code'     => [
-                        'channel_code' => 'QRIS'
-                    ]
-                ],
-                'metadata' => [
-                    'booking_id'   => $booking->id,
-                    'kode_booking' => $booking->kode_booking,
-                ],
-            ]);
-
-            $response = $apiInstance->createPaymentRequest(null, null, $body);
-            // hari ini
-            dd($response);
-
-            // --- Ambil QR string ---
-            $qrString = null;
-            $paymentMethod = $response->getPaymentMethod();
-            if ($paymentMethod) {
-                $qrCode = $paymentMethod->getQrCode();
-                if ($qrCode && method_exists($qrCode, 'getChannelProperties')) {
-                    $props = $qrCode->getChannelProperties();
-                    $qrString = $props['qr_string'] ?? null;
-                }
-                if (!$qrString) {
-                    $actions = $paymentMethod->getActions() ?? [];
-                    foreach ($actions as $action) {
-                        if (isset($action['url']) && strpos($action['url'], 'qris') !== false) {
-                            $qrString = $action['url'];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $booking->update([
-                'qris_string'      => $qrString,
-                'qris_request_id'  => $response->getId(),
-                'qris_expired_at'  => now()->addMinutes(10),
-            ]);
-
-            Log::info('QRIS generated for booking', ['booking_id' => $booking->id]);
-        } catch (Exception $e) {
-            Log::error('Gagal generate QRIS', [
-                'booking_id' => $booking->id,
-                'error'      => $e->getMessage(),
-                'file'       => $e->getFile(),
-                'line'       => $e->getLine(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
-            $booking->update([
-                'qris_string'     => null,
-                'qris_request_id' => null,
-            ]);
-        }
-    }
-
+    /**
+     * Cek status pembayaran (hanya menampilkan status, tidak mengubah apapun).
+     */
     public function proses(Request $request, $bookingId)
     {
         $booking = Booking::with(['jadwal.lapangan', 'pelanggan'])
             ->findOrFail($bookingId);
 
-        if ($booking->status !== 'Tertunda') {
+        if ($booking->status === 'Berhasil') {
             return redirect()->route('pembayaran.sukses', $bookingId);
+        }
+
+        return back()->with('info', 'Pembayaran belum diterima. Silakan lakukan pembayaran dan klik "Saya Sudah Bayar".');
+    }
+
+    /**
+     * Konfirmasi manual setelah pengguna membayar (tombol "Saya Sudah Bayar").
+     */
+    public function konfirmasiManual($bookingId)
+    {
+        $booking = Booking::findOrFail($bookingId);
+
+        if ($booking->status === 'Berhasil') {
+            return redirect()->route('pembayaran.sukses', $booking->id)
+                ->with('info', 'Booking sudah berhasil.');
         }
 
         if ($booking->pembayaran()->exists()) {
-            return redirect()->route('pembayaran.sukses', $bookingId);
+            return redirect()->route('pembayaran.sukses', $booking->id)
+                ->with('info', 'Pembayaran sudah dicatat.');
         }
 
-        if ($booking->qris_request_id) {
-            try {
-                $apiInstance = new PaymentRequestApi();
-                $response = $apiInstance->getPaymentRequestByID($booking->qris_request_id, null);
-                if ($response && $response->getStatus() === 'SUCCEEDED') {
-                    $this->tandaiBerhasil($booking);
-                    return redirect()->route('pembayaran.sukses', $booking->id);
-                }
-            } catch (Exception $e) {
-                Log::warning('Gagal cek status pembayaran', ['booking_id' => $booking->id, 'error' => $e->getMessage()]);
-            }
+        try {
+            $this->tandaiBerhasil($booking);
+            return redirect()->route('pembayaran.sukses', $booking->id)
+                ->with('success', 'Pembayaran berhasil dikonfirmasi!');
+        } catch (Exception $e) {
+            Log::error('Konfirmasi manual gagal', ['booking_id' => $booking->id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Gagal memproses konfirmasi: ' . $e->getMessage());
         }
-
-        return back()->with('info', 'Pembayaran belum diterima. Silakan coba lagi setelah membayar.');
     }
 
+    /**
+     * Method simulasi (opsional, untuk testing).
+     */
     public function simulasi($bookingId)
     {
         $booking = Booking::findOrFail($bookingId);
@@ -159,13 +98,23 @@ class PembayaranController extends Controller
         }
     }
 
+    /**
+     * Proses inti menandai booking berhasil.
+     * Menggunakan lockForUpdate() untuk mencegah duplikasi notifikasi.
+     * Hanya membuat Notifikasi di database, TIDAK mengirim WhatsApp (agar tidak duplikat).
+     */
     private function tandaiBerhasil(Booking $booking)
     {
         DB::transaction(function () use ($booking) {
-            if ($booking->pembayaran()->exists()) {
+            // 🔒 Kunci baris booking agar tidak terjadi race condition
+            $booking = Booking::where('id', $booking->id)->lockForUpdate()->first();
+
+            // Cek ulang setelah di-lock
+            if ($booking->status === 'Berhasil' || $booking->pembayaran()->exists()) {
                 return;
             }
 
+            // Catat pembayaran
             Pembayaran::create([
                 'booking_id'         => $booking->id,
                 'metode_pembayaran'  => 'QRIS',
@@ -174,42 +123,35 @@ class PembayaranController extends Controller
                 'status_pembayaran'  => 'Berhasil',
             ]);
 
+            // Update status booking
             $booking->update(['status' => 'Berhasil']);
 
+            // Update status jadwal
             Jadwal::where('id', $booking->jadwal_id)->update(['status_jadwal' => 'Penuh']);
+
+            // Buat notifikasi di database (tanpa WhatsApp)
+            $pesanNotif = "Booking berhasil! Kode: {$booking->kode_booking}. Lapangan: {$booking->jadwal->lapangan->nama_lapangan}, Tanggal: {$booking->jadwal->tanggal_jadwal}, Jam: "
+                . date('H.i', strtotime($booking->jam_mulai)) . "-" . date('H.i', strtotime($booking->jam_selesai)) . ".";
 
             Notifikasi::create([
                 'booking_id'      => $booking->id,
-                'pesan'           => "Booking berhasil! Kode: {$booking->kode_booking}. Lapangan: {$booking->jadwal->lapangan->nama_lapangan}, Tanggal: {$booking->jadwal->tanggal_jadwal}, Jam: {$booking->jam_mulai} - {$booking->jam_selesai}.",
+                'pesan'           => $pesanNotif,
                 'tanggal_kirim'   => now(),
                 'status_terkirim' => true,
             ]);
+
+            // ⛔ TIDAK MENGIRIM WHATSAPP LAGI (hanya notifikasi database)
+            // Jika ingin mengirim WhatsApp, aktifkan kode di bawah ini, tapi akan duplikat
+            // if ($booking->pelanggan && $booking->pelanggan->nomor_hp) {
+            //     $pesanWa = "✅ *Bintang Sport Center*\n\nHalo *{$booking->pelanggan->nama_pelanggan}*,\nPembayaran Anda telah kami terima.\n\n🔖 No. Booking : *{$booking->kode_booking}*\n🏟 Lapangan : {$booking->jadwal->lapangan->nama_lapangan}\n💰 Total : Rp" . number_format($booking->total_bayar, 0, ',', '.') . "\n\nTerima kasih 🙏\n*Bintang Sport Center*";
+            //     app(WhatsappService::class)->kirim($booking->pelanggan->nomor_hp, $pesanWa);
+            // }
         });
     }
 
-    public function webhook(Request $request)
-    {
-        $token = $request->header('x-callback-token');
-        if ($token !== config('services.xendit.webhook_token')) {
-            abort(403);
-        }
-
-        $event = $request->input('event');
-        $data = $request->input('data', []);
-
-        if ($event === 'payment.succeeded' && ($data['status'] ?? null) === 'SUCCEEDED') {
-            $paymentRequestId = $data['payment_request_id'] ?? null;
-            if ($paymentRequestId) {
-                $booking = Booking::where('qris_request_id', $paymentRequestId)->first();
-                if ($booking && $booking->status === 'Tertunda') {
-                    $this->tandaiBerhasil($booking);
-                }
-            }
-        }
-
-        return response()->json(['status' => 'ok']);
-    }
-
+    /**
+     * Halaman sukses setelah pembayaran berhasil.
+     */
     public function sukses($bookingId)
     {
         $booking = Booking::with(['jadwal.lapangan', 'pelanggan', 'pembayaran'])
