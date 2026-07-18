@@ -21,9 +21,12 @@ class BookingController extends Controller
 
     public function create()
     {
-        $jadwals = Jadwal::with(['lapangan.promos'])
-            ->where('tanggal_jadwal', '>=', now()->toDateString())
-            ->get();
+        $jadwals = Jadwal::with([
+            'lapangan.promos',
+            'lapangan.jenisLapangan'
+        ])
+        ->where('tanggal_jadwal', '>=', now()->toDateString())
+        ->get();
 
         $jadwalData = $jadwals->map(function ($jadwal) {
             $promo = $jadwal->lapangan->promos
@@ -32,7 +35,7 @@ class BookingController extends Controller
                 ->where('tanggal_berakhir', '>=', $jadwal->tanggal_jadwal)
                 ->first();
 
-            $harga = $jadwal->lapangan->harga_lapangan;
+            $harga = $jadwal->lapangan->jenisLapangan->harga_per_jam;
             $hargaPromo = $promo
                 ? $harga - ($harga * $promo->diskon_persen / 100)
                 : null;
@@ -86,7 +89,7 @@ class BookingController extends Controller
             ->where('tanggal_berakhir', '>=', $jadwal->tanggal_jadwal)
             ->first();
 
-        $harga      = $jadwal->lapangan->harga_lapangan;
+        $harga = $jadwal->lapangan->jenisLapangan->harga_per_jam;
         $totalBayar = $promo ? $harga - ($harga * $promo->diskon_persen / 100) : $harga;
 
         $pelanggan = Pelanggan::updateOrCreate(

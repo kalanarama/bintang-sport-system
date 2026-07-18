@@ -394,7 +394,7 @@
 
                     <p class="lapangan-price">
                         <i class="fa-solid fa-money-bills"></i>
-                        Rp 120.000 / Jam
+                        Rp {{ number_format($jenisLapangans['Futsal A']->harga_per_jam ?? 0,0,',','.') }} / Jam
                     </p>
 
                     <p class="fasilitas-label">Fasilitas :</p>
@@ -433,7 +433,7 @@
 
                     <p class="lapangan-price">
                         <i class="fa-solid fa-money-bills"></i>
-                        Rp 150.000 / Jam
+                        Rp {{ number_format($jenisLapangans['Futsal B']->harga_per_jam ?? 0,0,',','.') }} / Jam
                     </p>
 
                     <p class="fasilitas-label">Fasilitas :</p>
@@ -476,7 +476,7 @@
 
                     <p class="lapangan-price">
                         <i class="fa-solid fa-money-bills"></i>
-                        Rp 60.000 / Jam
+                        Rp {{ number_format($jenisLapangans['Badminton']->harga_per_jam ?? 0,0,',','.') }} / Jam
                     </p>
 
                     <p class="fasilitas-label">Fasilitas :</p>
@@ -515,7 +515,7 @@
 
                     <p class="lapangan-price">
                         <i class="fa-solid fa-money-bills"></i>
-                        Rp 160.000 / Jam
+                        Rp {{ number_format($jenisLapangans['Basket']->harga_per_jam ?? 0,0,',','.') }} / Jam
                     </p>
 
                     <p class="fasilitas-label">Fasilitas :</p>

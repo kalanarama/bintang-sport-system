@@ -11,8 +11,10 @@ return new class extends Migration
         Schema::create('lapangan', function (Blueprint $table) {
             $table->id();
             $table->string('nama_lapangan');
-            $table->string('jenis_lapangan');
-            $table->decimal('harga_lapangan', 10, 2);
+            $table->foreignId('jenis_lapangan_id')
+                ->constrained('jenis_lapangan')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
             $table->time('jam_buka');
             $table->time('jam_tutup');
             $table->unsignedTinyInteger('durasi_slot');

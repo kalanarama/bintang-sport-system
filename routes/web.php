@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\JenisLapanganController;
 use App\Http\Controllers\LapanganController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\PromoController;
@@ -34,9 +35,8 @@ Route::get('/beranda', function () {
     return view('pelanggan.berandaPage');
 });
 
-Route::get('/lapangan', function () {
-    return view('pelanggan.lapanganPage');
-});
+Route::get('/lapangan', [LapanganController::class, 'lapanganPage'])
+    ->name('lapangan.public');
 
 Route::get('/kebijakan-privasi', function () {
     return view('pelanggan.kebijakan');
@@ -66,6 +66,9 @@ Route::middleware(['auth.admin'])->prefix('admin')->name('admin.')->group(functi
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Jenis Lapangan
+    Route::resource('jenisLapangan', JenisLapanganController::class);
 
     // Lapangan
     Route::resource('lapangan', LapanganController::class);

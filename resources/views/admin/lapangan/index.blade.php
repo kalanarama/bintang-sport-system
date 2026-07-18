@@ -19,7 +19,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
-                text: '{{ session('success') }}',
+                text: "{{ session('success') }}",
                 confirmButtonColor: '#1565C0',
                 timer: 4000,
                 timerProgressBar: true,
@@ -59,8 +59,11 @@
                         @endif
                     </td>
                     <td>{{ $lapangan->nama_lapangan }}</td>
-                    <td>{{ $lapangan->jenis_lapangan }}</td>
-                    <td>Rp{{ number_format($lapangan->harga_lapangan, 0, ',', '.') }}</td>
+                    <td>{{ $lapangan->jenisLapangan->nama_jenis_lapangan ?? '-' }}</td>
+
+                    <td>
+                        Rp{{ number_format($lapangan->jenisLapangan->harga_per_jam ?? 0, 0, ',', '.') }}
+                    </td>
                     <td>
                         @if($lapangan->status_lapangan == 'aktif')
                             <span class="badge-aktif">Aktif</span>

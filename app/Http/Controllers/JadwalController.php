@@ -42,12 +42,12 @@ class JadwalController extends Controller
     }
 
     public function public()
-    {
-        $jadwals = Jadwal::with('lapangan')
-            ->where('tanggal_jadwal', '>=', now()->toDateString())
-            ->orderBy('tanggal_jadwal')
-            ->get();
+{
+    $jadwals = Jadwal::with('lapangan.jenisLapangan')
+        ->where('tanggal_jadwal', '>=', now()->toDateString())
+        ->orderBy('tanggal_jadwal')
+        ->get();
 
-        return view('pelanggan.jadwal.index', compact('jadwals'));
-    }
+    return view('pelanggan.jadwal.index', compact('jadwals'));
+}
 }
