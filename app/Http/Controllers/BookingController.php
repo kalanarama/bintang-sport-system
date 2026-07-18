@@ -104,9 +104,6 @@ class BookingController extends Controller
             'kode_booking'   => 'BSC-' . strtoupper(Str::random(6)) . '-' . now()->format('dmY'),
         ]);
 
-        // Kirim notifikasi WhatsApp bahwa booking berhasil dibuat
-        $this->sendWhatsAppNotification($booking, $pelanggan);
-
         // Arahkan ke halaman pembayaran (menampilkan QRIS statis)
         return redirect()->route('pembayaran.show', $booking->id)
             ->with('success', 'Booking berhasil! Silakan lakukan pembayaran.');
@@ -180,8 +177,7 @@ class BookingController extends Controller
             "💰 Total : Rp" . number_format($booking->total_bayar, 0, ',', '.') . "\n" .
             "==================================\n\n" .
             "⚠️ *PENTING*\n" .
-            "1. Segera lakukan pembayaran dengan scan QRIS yang tersedia di halaman pembayaran.\n" .
-            "2. Setelah membayar, klik tombol 'Saya Sudah Bayar' untuk mengonfirmasi.\n\n" .
+            "Pastikan sudah mengecek jadwal dan datang tepat waktu.\n\n" .
             "Terima kasih 🙏\n" .
             "*Bintang Sport Center*";
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <title>Booking Lapangan - Bintang Sport</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -545,7 +545,7 @@ function renderWeek() {
         const d = new Date(weekStart);
         d.setDate(weekStart.getDate() + i);
         if (d.getMonth() !== monthVal - 1) continue;
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = toLocalDateStr(d);
         const btn = document.createElement('div');
         btn.className = 'day-btn' + (activeDate === dateStr ? ' active' : '');
         btn.innerHTML = `<div class="day-name">${hariNama[d.getDay()]}</div><div class="day-num">${String(d.getDate()).padStart(2,'0')}</div>`;
@@ -677,6 +677,13 @@ function formatHP(input) {
 
 function formatRp(num) {
     return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function toLocalDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
 }
 
 function formatTanggal(dateStr) {

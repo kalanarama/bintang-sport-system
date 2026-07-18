@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <title>Booking Berhasil - Bintang Sport</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <style>
         * {
             margin: 0;
@@ -59,9 +61,9 @@
             justify-content: center;
             margin: 0 auto 10px;
         }
-        .icon-success svg {
-            width: 22px;
-            height: 22px;
+        .icon-success i {
+            color: #fff;
+            font-size: 20px;
         }
 
         h2 {
@@ -113,6 +115,10 @@
             align-items: center;
             gap: 6px;
         }
+        .lapangan-detail i {
+            color: #0052cc;
+            font-size: 13px;
+        }
 
         .total-block {
             text-align: left;
@@ -134,6 +140,14 @@
             font-size: 11px;
             color: #94a3b8;
             margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .note i {
+            font-size: 12px;
+            color: #94a3b8;
         }
 
         .btn-primary {
@@ -165,9 +179,7 @@
         <span class="badge-tab">BOOKING BERHASIL</span>
         <div class="container">
             <div class="icon-success">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <i class="bi bi-check-lg"></i>
             </div>
             <h2>Booking Berhasil!</h2>
             <p class="subtitle">Pembayaran telah diterima.</p>
@@ -180,10 +192,10 @@
             <div class="info-block">
                 <div class="lapangan-name">{{ $booking->jadwal->lapangan->nama_lapangan ?? 'Lapangan' }}</div>
                 <div class="lapangan-detail">
-                    📅 {{ \Carbon\Carbon::parse($booking->jadwal->tanggal_jadwal)->format('d F Y') }}
+                    <i class="bi bi-calendar-event"></i> {{ \Carbon\Carbon::parse($booking->jadwal->tanggal_jadwal)->format('d F Y') }}
                 </div>
                 <div class="lapangan-detail">
-                    🕐 {{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H.i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H.i') }}
+                    <i class="bi bi-clock"></i> {{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H.i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H.i') }}
                 </div>
             </div>
 
@@ -192,9 +204,9 @@
                 <div class="total-bayar">Rp{{ number_format($booking->total_bayar, 0, ',', '.') }}</div>
             </div>
 
-            <p class="note">📲 Detail booking telah dikirim ke WhatsApp Anda.</p>
+            <p class="note"><i class="bi bi-whatsapp"></i> Detail booking telah dikirim ke WhatsApp Anda.</p>
 
-            <a href="{{ url('/') }}" class="btn-primary">Kembali ke Beranda</a>
+            <a href="{{ url('/beranda') }}" class="btn-primary">Kembali ke Beranda</a>
         </div>
     </div>
 

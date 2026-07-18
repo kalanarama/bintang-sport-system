@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         AdminSeeder::class,
         LapanganSeeder::class,
         PromoSeeder::class,
+        JadwalSeeder::class,
     ]);
 }
 }

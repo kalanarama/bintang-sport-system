@@ -101,7 +101,7 @@ class PembayaranController extends Controller
     /**
      * Proses inti menandai booking berhasil.
      * Menggunakan lockForUpdate() untuk mencegah duplikasi notifikasi.
-     * Hanya membuat Notifikasi di database, TIDAK mengirim WhatsApp (agar tidak duplikat).
+     * Membuat Notifikasi database dan mengirim WhatsApp.
      */
     private function tandaiBerhasil(Booking $booking)
     {
@@ -129,7 +129,7 @@ class PembayaranController extends Controller
             // Update status jadwal
             Jadwal::where('id', $booking->jadwal_id)->update(['status_jadwal' => 'Penuh']);
 
-            // Buat notifikasi di database (tanpa WhatsApp)
+            // Buat notifikasi di database
             $pesanNotif = "Booking berhasil! Kode: {$booking->kode_booking}. Lapangan: {$booking->jadwal->lapangan->nama_lapangan}, Tanggal: {$booking->jadwal->tanggal_jadwal}, Jam: "
                 . date('H.i', strtotime($booking->jam_mulai)) . "-" . date('H.i', strtotime($booking->jam_selesai)) . ".";
 
@@ -140,12 +140,22 @@ class PembayaranController extends Controller
                 'status_terkirim' => true,
             ]);
 
-            // ⛔ TIDAK MENGIRIM WHATSAPP LAGI (hanya notifikasi database)
-            // Jika ingin mengirim WhatsApp, aktifkan kode di bawah ini, tapi akan duplikat
-            // if ($booking->pelanggan && $booking->pelanggan->nomor_hp) {
-            //     $pesanWa = "✅ *Bintang Sport Center*\n\nHalo *{$booking->pelanggan->nama_pelanggan}*,\nPembayaran Anda telah kami terima.\n\n🔖 No. Booking : *{$booking->kode_booking}*\n🏟 Lapangan : {$booking->jadwal->lapangan->nama_lapangan}\n💰 Total : Rp" . number_format($booking->total_bayar, 0, ',', '.') . "\n\nTerima kasih 🙏\n*Bintang Sport Center*";
-            //     app(WhatsappService::class)->kirim($booking->pelanggan->nomor_hp, $pesanWa);
-            // }
+            // ✅ Kirim WhatsApp setelah pembayaran berhasil
+            if ($booking->pelanggan && $booking->pelanggan->nomor_hp) {
+                $pesanWa =
+                    "✅ *Bintang Sport Center*\n\n" .
+                    "Halo *{$booking->pelanggan->nama_pelanggan}*,\n" .
+                    "Pembayaran Anda telah kami terima.\n\n" .
+                    "🔖 No. Booking : *{$booking->kode_booking}*\n" .
+                    "🏟 Lapangan : {$booking->jadwal->lapangan->nama_lapangan}\n" .
+                    "📅 Tanggal : " . \Carbon\Carbon::parse($booking->jadwal->tanggal_jadwal)->locale('id')->translatedFormat('l, d F Y') . "\n" .
+                    "⏰ Jam : " . \Carbon\Carbon::parse($booking->jam_mulai)->format('H.i') . " - " . \Carbon\Carbon::parse($booking->jam_selesai)->format('H.i') . "\n" .
+                    "💰 Total : Rp" . number_format($booking->total_bayar, 0, ',', '.') . "\n\n" .
+                    "Terima kasih 🙏\n" .
+                    "*Bintang Sport Center*";
+
+                app(WhatsappService::class)->kirim($booking->pelanggan->nomor_hp, $pesanWa);
+            }
         });
     }
 
