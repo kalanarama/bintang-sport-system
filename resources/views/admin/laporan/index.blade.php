@@ -233,11 +233,11 @@
             </td>
 
             <td>
-                {{ $booking->jadwal->lapangan->nama_lapangan ?? '-' }}
+                {{ optional(optional($booking->jadwal)->lapangan)->nama_lapangan ?? '-' }}
             </td>
 
             <td>
-                {{ $booking->pelanggan->nama_pelanggan ?? '-' }}
+                {{ optional($booking->pelanggan)->nama_pelanggan ?? '-' }}
             </td>
 
             <td style="font-weight:700;color:#1565C0;">
@@ -297,25 +297,13 @@
 
 @if($bookings->count())
 
-<div class="d-flex justify-content-between align-items-center px-4 py-3"
+<div class="px-4 py-3"
      style="border-top:1px solid #f0f4ff;">
 
     <small class="text-muted">
-
-        Menampilkan
-        {{ $bookings->firstItem() }}
-        -
-        {{ $bookings->lastItem() }}
-
-        dari
-
-        {{ $bookings->total() }}
-
-        data
-
+        Total Data :
+        <strong>{{ $bookings->count() }}</strong>
     </small>
-
-    {{ $bookings->links('pagination::bootstrap-5') }}
 
 </div>
 

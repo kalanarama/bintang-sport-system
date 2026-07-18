@@ -16,7 +16,8 @@ class LaporanRekapitulasiController extends Controller
             'pelanggan',
             'pembayaran'
         ])
-        ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+        ->whereDate('created_at', '>=', $tanggalAwal)
+        ->whereDate('created_at', '<=', $tanggalAkhir)
         ->latest()
         ->get();
     }
