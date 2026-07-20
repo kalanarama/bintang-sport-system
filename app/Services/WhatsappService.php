@@ -15,11 +15,22 @@ class WhatsappService
         $token  = config('services.fonnte.token');
         $target = $this->formatNomor($nomor);
 
+        Log::info('Fonnte BEFORE SEND', [
+            'target'       => $target,
+            'token_length' => strlen($token),
+            'token_prefix' => substr($token, 0, 8),
+        ]);
+
         $response = Http::withHeaders([
             'Authorization' => $token,
         ])->post('https://api.fonnte.com/send', [
             'target'  => $target,
             'message' => $pesan,
+        ]);
+
+        Log::info('Fonnte RESPONSE', [
+            'status' => $response->status(),
+            'body'   => $response->body(),
         ]);
 
         if (!$response->successful()) {

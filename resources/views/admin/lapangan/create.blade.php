@@ -8,7 +8,7 @@
     <p>Isi data lapangan baru yang akan ditambahkan.</p>
 </div>
 
-<div class="card-custom" style="max-width: 600px; padding: 28px;">
+<div class="card-custom" style="max-width: 720px; padding: 28px;">
     <form action="{{ route('admin.lapangan.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -25,33 +25,40 @@
 
         <div class="mb-3">
             <label class="form-label">Jenis Lapangan</label>
-            <select name="jenis_lapangan" class="form-select @error('jenis_lapangan') is-invalid @enderror">
+            <select name="jenis_lapangan_id" id="jenisLapanganSelect" class="form-select @error('jenis_lapangan_id') is-invalid @enderror">
                 <option value="">Pilih Jenis</option>
-                <option value="Futsal A" {{ old('jenis_lapangan') == 'Futsal A' ? 'selected' : '' }}>Futsal A</option>
-                <option value="Futsal B" {{ old('jenis_lapangan') == 'Futsal B' ? 'selected' : '' }}>Futsal B</option>
-                <option value="Badminton" {{ old('jenis_lapangan') == 'Badminton' ? 'selected' : '' }}>Badminton</option>
-                <option value="Basket" {{ old('jenis_lapangan') == 'Basket' ? 'selected' : '' }}>Basket</option>
+                @foreach($jenisLapangans as $jenis)
+                    <option value="{{ $jenis->id }}"
+                        data-harga="{{ $jenis->harga_per_jam }}"
+                        {{ old('jenis_lapangan_id') == $jenis->id ? 'selected' : '' }}>
+                        {{ $jenis->nama_jenis_lapangan }}
+                    </option>
+                @endforeach
             </select>
-            @error('jenis_lapangan')
+            @error('jenis_lapangan_id')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Harga/Jam</label>
-            <div class="input-group">
-                <span class="input-group-text" style="background:#f0f4ff; border-color:#e0e7ff;">Rp</span>
-                <input type="number" name="harga_lapangan"
-                    class="form-control @error('harga_lapangan') is-invalid @enderror"
-                    placeholder="50000"
-                    min="1"
-                    value="{{ old('harga_lapangan') }}">
-            </div>
-            @error('harga_lapangan')
-                <div class="invalid-feedback d-block">{{ $message }}</div>
-            @enderror
+        <div class="mb-3" id="fieldHarga" style="display:none;">
+        <label class="form-label">Harga/Jam</label>
+        <div class="input-group">
+            <span class="input-group-text" style="background:#f0f4ff; border-color:#e0e7ff;">Rp</span>
+           <input type="number" name="harga_per_jam" id="inputHarga"
+                class="form-control @error('harga_per_jam') is-invalid @enderror"
+                value="{{ old('harga_per_jam') }}">
         </div>
+        <small class="text-warning mt-1 d-block" id="warningHarga" style="display:none;">
+            <i class="fas fa-triangle-exclamation"></i>
+            Mengubah harga akan mempengaruhi semua lapangan dengan jenis
+            <strong id="namaJenisWarning"></strong>.
+        </small>
+        @error('harga_per_jam')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
 
+        
         <div class="mb-3">
             <label class="form-label">Jam Operasional</label>
             <div class="d-flex align-items-start gap-2">
@@ -91,7 +98,7 @@
             <label class="form-label">Foto Lapangan</label>
             <input type="file" name="foto_lapangan" accept="image/*"
                 class="form-control @error('foto_lapangan') is-invalid @enderror"
-                onchange="previewFoto(this)">
+                onchange="validateAndPreview(this)">
             <small class="text-muted">Format: JPG, JPEG, PNG. Maksimal 5MB.</small>
             @error('foto_lapangan')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -121,8 +128,7 @@
         </div>
     </form>
 </div>
-@endsection
-
+@endsection 
 @push('scripts')
 <script>
     function previewFoto(input) {
@@ -137,5 +143,102 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    const jenisSelect = document.getElementById('jenisLapanganSelect');
+    const fieldHarga = document.getElementById('fieldHarga');
+    const inputHarga = document.getElementById('inputHarga');
+    const warningHarga = document.getElementById('warningHarga');
+    const namaJenisWarning = document.getElementById('namaJenisWarning');
+
+    jenisSelect.addEventListener('change', function () {
+    const selected = this.options[this.selectedIndex];
+    const harga = selected.getAttribute('data-harga');
+    const nama = selected.text;
+
+    if (this.value) {
+        inputHarga.value = harga;
+        namaJenisWarning.textContent = nama;
+        fieldHarga.style.display = 'block';
+        warningHarga.style.display = 'block';
+    } else {
+        fieldHarga.style.display = 'none';
+        warningHarga.style.display = 'none';
+        inputHarga.value = '';
+    }
+});
+
+function validateAndPreview(input) {
+    const maxSize = 5 * 1024 * 1024;
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const file = input.files[0];
+    if (!file) return;
+
+    let errDiv = document.getElementById('fotoError');
+    if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'fotoError';
+        errDiv.className = 'invalid-feedback d-block';
+        input.parentNode.appendChild(errDiv);
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+        input.value = '';
+        document.getElementById('preview').style.display = 'none';
+        errDiv.textContent = 'Format foto tidak valid. Hanya JPG, JPEG, dan PNG yang diperbolehkan.';
+        return;
+    }
+
+    if (file.size > maxSize) {
+        input.value = '';
+        document.getElementById('preview').style.display = 'none';
+        errDiv.textContent = 'Ukuran foto terlalu besar. Maksimal 5MB, ukuran kamu: ' + (file.size / 1024 / 1024).toFixed(2) + ' MB.';
+        return;
+    }
+
+    errDiv.textContent = '';
+
+    const preview = document.getElementById('preview');
+    const previewImg = document.getElementById('previewImg');
+    const reader = new FileReader();
+    reader.onload = e => {
+        previewImg.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+document.querySelector('form').addEventListener('submit', function(e) {
+    const harga = document.getElementById('inputHarga');
+    document.getElementById('error-harga')?.remove();
+
+    if (document.getElementById('fieldHarga').style.display !== 'none') {
+        if (!harga.value || parseInt(harga.value) < 30000) {
+            harga.classList.add('is-invalid');
+            const el = document.createElement('div');
+            el.id = 'error-harga';
+            el.className = 'invalid-feedback d-block';
+            el.textContent = !harga.value 
+                ? 'Harga per jam wajib diisi.' 
+                : 'Harga per jam minimal Rp 30.000.';
+            harga.closest('.input-group').insertAdjacentElement('afterend', el);
+            e.preventDefault();
+        } else {
+            harga.classList.remove('is-invalid');
+        }
+    }
+});
+
+document.getElementById('inputHarga').addEventListener('input', function() {
+    if (this.value && parseInt(this.value) >= 30000) {
+        this.classList.remove('is-invalid');
+        document.getElementById('error-harga')?.remove();
+    }
+});
+
+@if(old('jenis_lapangan_id'))
+    fieldHarga.style.display = 'block';
+    warningHarga.style.display = 'block';
+    const selectedOpt = jenisSelect.options[jenisSelect.selectedIndex];
+    namaJenisWarning.textContent = selectedOpt.text;
+@endif
 </script>
 @endpush

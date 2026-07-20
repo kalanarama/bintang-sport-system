@@ -382,26 +382,20 @@
             Pilih lapangan favoritmu dan lihat jadwal yang tersedia.
         </p>
 
-        <div class="kategori-wrapper">
-
-            <button class="kategori-btn active" data-filter="all">
-                Semua
-            </button>
-
-            <button class="kategori-btn" data-filter="futsal">
-                Futsal
-            </button>
-
-            <button class="kategori-btn" data-filter="badminton">
-                Badminton
-            </button>
-
-            <button class="kategori-btn" data-filter="basket">
-                Basket
-            </button>
-
+       <div class="kategori-wrapper">
+            <button class="kategori-btn active" data-filter="all">Semua</button>
+            @php
+                $urutanJenis = ['Futsal A', 'Futsal B', 'Badminton', 'Basket'];
+                $jenisAda = $lapangans->pluck('jenisLapangan.nama_jenis_lapangan')->filter()->unique()->values()->toArray();
+$jenisUrut =    array_filter($urutanJenis, fn($j) => in_array($j, $jenisAda));
+            @endphp
+          
+            @foreach($jenisUrut as $jenis)
+                <button class="kategori-btn" data-filter="{{ $jenis }}">
+                    {{ $jenis }}
+                </button>
+            @endforeach
         </div>
-
             <div class="lapangan-grid">
 
             <div id="empty-message" style="display:none; text-align:center; padding:40px;">
@@ -411,8 +405,8 @@
 
             @forelse($lapangans as $item)
 
-            <div class="card {{ $item->status_lapangan == 'nonaktif' ? 'nonaktif' : '' }}"
-                data-category="{{ strtolower($item->jenis_lapangan) }}">
+           <div class="card {{ $item->status_lapangan == 'nonaktif' ? 'nonaktif' : '' }}"
+                data-category="{{ $item->jenisLapangan->nama_jenis_lapangan ?? '' }}">
 
                 <div class="card-image">
 
@@ -432,38 +426,34 @@
                     <!-- Badge kategori -->
                     <div class="kategori">
 
-                        @switch($item->jenis_lapangan)
-
-                            @case('Futsal')
+                        @switch($item->jenisLapangan->nama_jenis_lapangan ?? '')
+                            @case('Futsal A')
                             <i class="fa-regular fa-futbol"></i>
                             @break
-
+                            @case('Futsal B')
+                            <i class="fa-regular fa-futbol"></i>
+                            @break
                             @case('Badminton')
                             <i class="fa-solid fa-table-tennis-paddle-ball"></i>
                             @break
-
                             @case('Basket')
                             <i class="fa-solid fa-basketball"></i>
                             @break
-
                         @endswitch
-
-                        {{ $item->jenis_lapangan }}
+                        {{ $item->jenisLapangan->nama_jenis_lapangan ?? '-' }}
 
                     </div>
 
                     <h2>{{ $item->nama_lapangan }}</h2>
 
                     <div class="price">
-                        Rp {{ number_format($item->harga_lapangan,0,',','.') }}
+                        Rp {{ number_format($item->jenisLapangan->harga_per_jam ?? 0,0,',','.') }}
                         <small>/Jam</small>
                     </div>
 
                     @if($item->status_lapangan=='aktif')
 
-                    <a href="#" class="btn-detail">
-                        Selengkapnya
-                    </a>
+                   <a href="{{ route('booking.create', ['lapangan_id' => $item->id]) }}" class="btn-detail">Booking</a>
 
                     @else
 
@@ -529,9 +519,7 @@
         const emptyMessage = document.getElementById("empty-message");
 
         kategori.forEach(btn => {
-
             btn.onclick = function () {
-
                 kategori.forEach(x => x.classList.remove("active"));
                 this.classList.add("active");
 
@@ -539,33 +527,26 @@
                 let adaData = false;
 
                 card.forEach(item => {
-
                     if (filter === "all" || item.dataset.category === filter) {
                         item.style.display = "block";
                         adaData = true;
                     } else {
                         item.style.display = "none";
                     }
-
                 });
 
                 emptyMessage.style.display = adaData ? "none" : "block";
-
             }
-
         });
 
-        window.addEventListener("DOMContentLoaded", () => {
-
-            const btn = document.querySelector(
-                `.kategori-btn[data-filter="${kategoriAwal}"]`
-            );
-
-            if (btn) {
-                btn.click();
-            }
-
-        });
+       const btn = document.querySelector(
+            `.kategori-btn[data-filter="${kategoriAwal}"]`
+        );
+        if (btn) {
+            btn.click();
+        } else {
+            document.querySelector('.kategori-btn[data-filter="all"]').click();
+        }
     </script>
 </body>
 </html>

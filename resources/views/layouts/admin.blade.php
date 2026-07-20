@@ -449,13 +449,7 @@
             data-title="Dashboard">
             <i class="fas fa-th-large"></i>
             <span>Dashboard</span>
-        </a>
-        <a href="{{ route('admin.jenisLapangan.index') }}"
-            class="sidebar-item {{ request()->routeIs('admin.jenisLapangan.*') ? 'active' : '' }}"
-            data-title="Kelola Jenis Lapangan">
-            <i class="fa-solid fa-basketball"></i>
-            <span>Kelola Jenis Lapangan</span>
-        </a>        
+        </a>      
         <a href="{{ route('admin.lapangan.index') }}"
             class="sidebar-item {{ request()->routeIs('admin.lapangan.*') ? 'active' : '' }}"
             data-title="Kelola Lapangan">

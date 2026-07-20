@@ -145,6 +145,10 @@
         padding: 60px 20px;
         color: #94a3b8;
         font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
     .no-data i { font-size: 40px; margin-bottom: 12px; display: block; }
 
@@ -373,19 +377,19 @@
                                     $skipKolom    = $colspan - 1;
 
                                     $isPenuh = $slot->status_jadwal === 'Penuh';
-                                    $promo   = $slot->lapangan->promos
+                                    $promo = $slot->lapangan->promos
                                         ->filter(function($p) use ($slot) {
                                             $jamSlot = substr($slot->jam_mulai, 0, 5) . '-' . substr($slot->jam_selesai, 0, 5);
                                             $slots   = is_array($p->pivot->slots)
                                                 ? $p->pivot->slots
                                                 : json_decode($p->pivot->slots, true) ?? [];
                                             return $p->status_promo
-                                                && $p->tanggal_mulai <= $slot->tanggal_jadwal
-                                                && $p->tanggal_berakhir >= $slot->tanggal_jadwal
+                                                && \Carbon\Carbon::parse($p->tanggal_mulai)->lte(\Carbon\Carbon::parse($slot->tanggal_jadwal))
+                                                && \Carbon\Carbon::parse($p->tanggal_berakhir)->gte(\Carbon\Carbon::parse($slot->tanggal_jadwal))
                                                 && in_array($jamSlot, $slots);
                                         })->first();
 
-                                    $harga      = $slot->lapangan->harga_lapangan;
+                                    $harga = $slot->lapangan->jenisLapangan->harga_per_jam ?? 0;
                                     $hargaPromo = $promo ? $harga - ($harga * $promo->diskon_persen / 100) : null;
                                     $booking    = $slot->bookings->first();
 

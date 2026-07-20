@@ -89,3 +89,4 @@ Schedule::call(function () {
         }
     }
 })->dailyAt('00:01')->name('generate-jadwal-harian');
+Schedule::command('booking:auto-cancel')->hourly()->name('auto-cancel-booking');

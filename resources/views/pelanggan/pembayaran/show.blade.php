@@ -52,7 +52,7 @@
             color: #03045e;
             margin-left: 4px;
             border-left: 1px solid #e2e8f0;
-            padding-left: 10px;
+            padding: 84px 20px 30px;
         }
 
         .page-body {
@@ -60,6 +60,7 @@
             display: flex;
             justify-content: center;
             padding: 30px 20px;
+            margin-top: 64px;
         }
 
         .card-wrap {
@@ -67,22 +68,10 @@
             width: 100%;
         }
 
-        .badge-tab {
-            display: inline-block;
-            background: #0052cc;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            padding: 6px 14px;
-            border-radius: 8px 8px 0 0;
-            margin-left: 4px;
-        }
 
         .container {
             background: white;
             border-radius: 14px;
-            border-top-left-radius: 0;
             padding: 18px 18px 16px;
             box-shadow: 0 6px 18px rgba(0,0,0,0.06);
             border: 1px solid #e2e8f0;
@@ -205,18 +194,40 @@
     </style>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <body>
 
-<!-- ===== Navbar atas berisi tombol kembali (baru) ===== -->
-<div class="navbar">
-    <a href="{{ url('/booking') }}" class="back-link">
+<div class="navbar" style="
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 0 32px;
+    width: 100%;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 1000;
+">
+    <a href="{{ url('/beranda') }}">
+        <img src="{{ asset('img/logo.png') }}" alt="Bintang Sport" style="height:38px;">
+    </a>
+    <div style="font-size:16px; font-weight:700; color:#10275b; position:absolute; left:50%; transform:translateX(-50%);">
+        Pembayaran
+    </div>
+    <a href="{{ route('pembayaran.sukses', $booking->id) }}" style="
+        display:inline-flex; align-items:center; gap:6px;
+        font-size:13px; font-weight:600; color:#475569;
+        background:#f1f5f9; border-radius:8px; padding:8px 16px;
+        text-decoration:none;
+    ">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
 
 <div class="page-body">
     <div class="card-wrap">
-        <span class="badge-tab">PEMBAYARAN</span>
         <div class="container">
 
             <!-- QRIS Statis -->
@@ -226,9 +237,13 @@
             </div>
 
             <!-- Detail -->
+             @php
+                $allBookings = \App\Models\Booking::where('kode_booking', $booking->kode_booking)->get();
+                $totalSemua  = $allBookings->sum('total_bayar');
+            @endphp
             <div class="detail-row">
                 <span class="detail-label">Total Pembayaran</span>
-                <span class="detail-value total">Rp{{ number_format($booking->total_bayar, 0, ',', '.') }}</span>
+                <span class="detail-value total">Rp{{ number_format($totalSemua, 0, ',', '.') }}</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Sisa Waktu Pembayaran</span>
@@ -244,11 +259,12 @@
             <!-- Tombol Konfirmasi (tanpa popup) -->
             <form action="{{ route('pembayaran.konfirmasi', $booking->id) }}" method="POST">
                 @csrf
+                <input type="hidden" id="nomor_hp_pelanggan" value="{{ $booking->pelanggan->nomor_hp ?? '' }}">
                 <button type="submit" class="btn-success">Saya Sudah Membayar</button>
             </form>
 
             <!-- Flash Messages -->
-            @if(session('info'))
+           @if(session('info'))
                 <div class="alert-info">{{ session('info') }}</div>
             @endif
             @if(session('success'))
@@ -257,60 +273,76 @@
             @if(session('error'))
                 <div class="alert-info alert-error">{{ session('error') }}</div>
             @endif
+            @if(session('wa_gagal'))
+                <div class="alert-info" style="background:#fff3cd; color:#856404; margin-top:10px;">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Booking berhasil, namun notifikasi konfirmasi gagal terkirim. Mohon catat kode booking Anda.
+                </div>
+            @endif
         </div>
     </div>
 </div>
 
 <script>
-    // Countdown timer 10 menit
-    let timeLeft = 60; // 10 menit
-    let isExpired = false;
-    const countdownEl = document.getElementById('countdown');
+@if(session('bayar_sukses'))
+    @if(session('wa_gagal'))
+    Swal.fire({
+        icon: 'warning',
+        title: 'Pembayaran Berhasil!',
+        text: 'Booking berhasil, namun notifikasi konfirmasi gagal terkirim. Mohon catat kode booking Anda.',
+        confirmButtonText: 'OK, Saya Mengerti',
+        confirmButtonColor: '#1565C0',
+        width: 'min(420px, 90vw)',
+        padding: '20px',
+    }).then(() => {
+        window.location.href = '/riwayat-pesanan?nomor={{ urlencode($booking->pelanggan->nomor_hp ?? "") }}';
+    });
+    @else
+    Swal.fire({
+        icon: 'success',
+        title: 'Pembayaran Berhasil!',
+        text: 'Anda akan diarahkan ke halaman riwayat pesanan.',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        width: 'min(420px, 90vw)',
+        padding: '20px',
+    }).then(() => {
+        window.location.href = '/riwayat-pesanan?nomor={{ urlencode($booking->pelanggan->nomor_hp ?? "") }}';
+    });
+    @endif
+@endif
+let timeLeft = 60;
+let isExpired = false;
+const countdownEl = document.getElementById('countdown');
 
-    function updateCountdown() {
-        if (timeLeft > 0) {
+function updateCountdown() {
+    if (timeLeft > 0) {
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
-
         countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-           
         timeLeft--;
-        } else if (!isExpired){
-            isExpired = true;
-
-            clearInterval(timerInterval);
-
-            countdownEl.innerHTML = '<i class="bi bi-alarm"></i> Habis';
-
-            document.querySelector('.btn-success').disabled = true;
-            document.querySelector('.btn-success').style.background = '#94a3b8';
-            document.querySelector('.btn-success').style.cursor = 'not-allowed';
-
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Waktu Pembayaran Habis',
-                    text: 'Anda akan diarahkan ke Riwayat Booking.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.style.fontSize = '14px';
-                        toast.style.width = 'auto';
-                        toast.style.padding = '12px 20px';
-                    }
-                    }).then(() => {
-                        window.location.href = '{{ route("booking.cek") }}';
-                    });
-
-                }, 500);
-        }
+    } else if (!isExpired) {
+        isExpired = true;
+        clearInterval(timerInterval);
+        Swal.fire({
+            icon: 'warning',
+            title: 'Sesi Berakhir!',
+            text: 'Waktu pembayaran habis. Anda akan diarahkan ke halaman riwayat pesanan.',
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+            width: 'min(420px, 90vw)',
+            padding: '20px',
+        }).then(() => {
+            window.location.href = '/riwayat-pesanan?nomor={{ urlencode($booking->pelanggan->nomor_hp ?? "") }}';
+        });
     }
-                
-    updateCountdown();
-    const timerInterval = setInterval(updateCountdown, 1000);
+}
+
+updateCountdown();
+const timerInterval = setInterval(updateCountdown, 1000);
+ 
 </script>
 
 </body>

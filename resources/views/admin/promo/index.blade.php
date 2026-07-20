@@ -79,8 +79,8 @@
             <div>
                 <select name="status" id="filterStatus" class="form-select">
                     <option value="">Semua Status</option>
-                    <option value="aktif"    {{ request('status') === 'aktif'    ? 'selected' : '' }}>Aktif</option>
-                    <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                    <option value="aktif"    {{ request('status') == 'aktif'    ? 'selected' : '' }}>Aktif</option>
+                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                 </select>
             </div>
             <div>
@@ -164,8 +164,10 @@
                 @empty
                 <tr>
                     <td colspan="8" class="text-center py-4" style="color:#94a3b8;">
-                        <i class="fas fa-tag mb-2" style="font-size:32px;display:block;"></i>
-                        Belum ada data promo
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                            <i class="fas fa-tag" style="font-size:32px;"></i>
+                            <span>Tidak ada promo yang sesuai.</span>
+                        </div>
                     </td>
                 </tr>
                 @endforelse
@@ -236,6 +238,10 @@
     .table-responsive {
         border-radius: 12px 12px 0 0;
         overflow: hidden;
+    }
+    #promoTable thead th {
+        white-space: nowrap;
+        vertical-align: middle;
     }
 </style>
 @endpush

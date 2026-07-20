@@ -577,7 +577,7 @@
                     <img src="{{ asset('img/futsal-a01.png') }}" alt="Futsal A">
                     <h3><i class="fa-regular fa-futbol"></i> Futsal A</h3>
                     <p>Lapangan rumput sintetis berkualitas dengan pencahayaan indoor yang terang.</p>
-                    <a href="{{ route('jadwal.public', ['kategori' => 'futsal']) }}" class="btn-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'Futsal A']) }}" class="btn-jadwal">
                         Lihat Jadwal
                     </a>
                 </article>
@@ -586,9 +586,9 @@
                     <img src="{{ asset('img/futsal-b.png') }}" alt="Futsal B">
                     <h3><i class="fa-regular fa-futbol"></i> Futsal B</h3>
                     <p>Lapangan indoor dengan suasana yang nyaman dan lapangan yang terawat.</p>
-                <a href="{{ route('jadwal.public', ['kategori' => 'futsal']) }}" class="btn-jadwal">
-                    Lihat Jadwal
-                </a>
+                    <a href="{{ route('jadwal.public', ['kategori' => 'Futsal B']) }}" class="btn-jadwal">
+                        Lihat Jadwal
+                    </a>
                 </article>
 
                 <article class="lapangan-card reveal">
@@ -599,7 +599,7 @@
                         Badminton
                     </h3>
                     <p>Lapangan badminton yang terawat dengan net standar berkualitas.</p>
-                    <a href="{{ route('jadwal.public', ['kategori' => 'badminton']) }}" class="btn-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'Badminton']) }}" class="btn-jadwal">
                         Lihat Jadwal
                     </a>
                 </article>
@@ -608,7 +608,7 @@
                     <img src="{{ asset('img/basket.png') }}" alt="Basket">
                     <h3><i class="fa-solid fa-basketball"></i> Basket</h3>
                     <p>Lapangan basket indoor yang nyaman dengan garis lapangan yang jelas.</p>
-                    <a href="{{ route('jadwal.public', ['kategori' => 'basket']) }}" class="btn-jadwal">
+                    <a href="{{ route('jadwal.public', ['kategori' => 'Basket']) }}" class="btn-jadwal">
                         Lihat Jadwal
                     </a>
                 </article>
@@ -717,7 +717,6 @@
 
         window.addEventListener('scroll', revealOnScroll);
 
-        // Supaya elemen yang sudah terlihat saat halaman pertama dibuka langsung muncul
         revealOnScroll();
     </script>
 </body>

@@ -33,8 +33,8 @@
             <label class="form-label fw-semibold">Besaran Diskon (%) <span class="text-danger">*</span></label>
             <input type="number" name="diskon_persen" id="diskon_input"
                 class="form-control @error('diskon_persen') is-invalid @enderror"
-                min="1" max="100"
                 value="{{ old('diskon_persen', $promo->diskon_persen) }}">
+
             @error('diskon_persen')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
@@ -55,7 +55,7 @@
                 <input type="date" name="tanggal_berakhir"
                     class="form-control @error('tanggal_berakhir') is-invalid @enderror"
                     value="{{ old('tanggal_berakhir', $promo->tanggal_berakhir->format('Y-m-d')) }}"
-                    min="{{ old('tanggal_mulai', $promo->tanggal_mulai->format('Y-m-d')) }}">>
+                    min="{{ old('tanggal_mulai', $promo->tanggal_mulai->format('Y-m-d')) }}">
                 @error('tanggal_berakhir')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
@@ -74,7 +74,7 @@
                         name="lapangan_ids[]" value="{{ $lapangan->id }}"
                         id="lap_{{ $lapangan->id }}"
                         data-nama="{{ $lapangan->nama_lapangan }}"
-                        data-harga="{{ $lapangan->harga_lapangan }}"
+                        data-harga="{{ $lapangan->jenisLapangan->harga_per_jam ?? 0 }}"
                         data-jam-buka="{{ $lapangan->jam_buka }}"
                         data-jam-tutup="{{ $lapangan->jam_tutup }}"
                         data-durasi="{{ $lapangan->durasi_slot }}"
@@ -85,7 +85,7 @@
                         {{ $lapangan->nama_lapangan }}
                         <span style="color:#94a3b8;font-size:11px;margin-left:6px;">|</span>
                         <span style="color:#1565C0;font-size:12px;font-weight:700;">
-                            Rp{{ number_format($lapangan->harga_lapangan, 0, ',', '.') }}
+                            Rp{{ number_format($lapangan->jenisLapangan->harga_per_jam ?? 0, 0, ',', '.') }}
                         </span>
                     </label>
                 </div>
@@ -94,6 +94,14 @@
         </div>
 
         <div id="slot_container"></div>
+
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Status Promo</label>
+            <select name="status_promo" class="form-select">
+                <option value="1" {{ old('status_promo', $promo->status_promo ? '1' : '0') == '1' ? 'selected' : '' }}>Aktif</option>
+                <option value="0" {{ old('status_promo', $promo->status_promo ? '1' : '0') == '0' ? 'selected' : '' }}>Nonaktif</option>
+            </select>
+        </div>
 
         <div class="d-flex gap-3 mt-4">
             <button type="submit" class="btn-primary-custom">
@@ -298,21 +306,24 @@
         }
 
         const diskon = document.getElementById('diskon_input');
-        if (!diskon.value || diskon.value < 1 || diskon.value > 100) {
+        document.getElementById('error-diskon')?.remove(); // hapus dulu error lama
+        if (!diskon.value || parseInt(diskon.value) < 1 || parseInt(diskon.value) > 100) {
             diskon.classList.add('is-invalid');
-            if (!document.getElementById('error-diskon')) {
-                const el = document.createElement('div');
-                el.id = 'error-diskon';
-                el.className = 'invalid-feedback d-block';
-                el.textContent = 'Besaran diskon wajib diisi (1-100).';
-                diskon.insertAdjacentElement('afterend', el);
+            const el = document.createElement('div');
+            el.id = 'error-diskon';
+            el.className = 'invalid-feedback d-block';
+            if (!diskon.value) {
+                el.textContent = 'Besaran diskon wajib diisi.';
+            } else if (parseInt(diskon.value) < 1) {
+                el.textContent = 'Diskon minimal 1%.';
+            } else {
+                el.textContent = 'Diskon maksimal 100%.';
             }
+            diskon.insertAdjacentElement('afterend', el);
             hasError = true;
         } else {
             diskon.classList.remove('is-invalid');
-            document.getElementById('error-diskon')?.remove();
         }
-
         const tglMulai = document.querySelector('[name="tanggal_mulai"]');
         if (!tglMulai.value) {
             tglMulai.classList.add('is-invalid');

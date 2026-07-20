@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <title>Booking Lapangan - Bintang Sport</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
@@ -216,15 +217,31 @@
         <h1 class="left-title" id="pageTitle">Jadwal Lapangan</h1>
         <p class="left-sub">Pilih tanggal dan waktu yang tersedia.</p>
 
-        <div class="calendar-wrap">
-            <div class="cal-header">
-                <div class="cal-title" id="calTitle"></div>
-                <div class="cal-nav">
-                    <button type="button" onclick="geserBulan(-1)"><i class="bi bi-chevron-left"></i></button>
-                    <button type="button" onclick="geserBulan(1)"><i class="bi bi-chevron-right"></i></button>
-                </div>
+        <div class="datepicker-wrap" style="position:relative; margin-bottom:20px;">
+            <div id="dateInput" onclick="toggleCalendar()" style="
+                background:white; border:1.5px solid #e2e8f0; border-radius:10px;
+                padding:12px 16px; display:flex; align-items:center; gap:10px;
+                cursor:pointer; font-size:14px; font-weight:600; color:#475569;
+                transition:0.2s; width:fit-content; min-width:220px;
+            ">
+                <i class="bi bi-calendar3" style="color:#0052cc;"></i>
+                <span id="dateInputText">Pilih Tanggal</span>
+                <i class="bi bi-chevron-down" style="margin-left:auto;" id="calChevron"></i>
             </div>
-            <div class="cal-grid" id="calGrid"></div>
+            <div id="calDropdown" style="
+                display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:100;
+                background:white; border-radius:14px; border:1.5px solid #e2e8f0;
+                padding:20px; box-shadow:0 8px 24px rgba(0,0,0,0.1); min-width:320px;
+            ">
+                <div class="cal-header">
+                    <div class="cal-title" id="calTitle"></div>
+                    <div class="cal-nav">
+                        <button type="button" onclick="geserBulan(-1)"><i class="bi bi-chevron-left"></i></button>
+                        <button type="button" onclick="geserBulan(1)"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+            </div>
         </div>
 
         <div class="slot-panel">
@@ -243,6 +260,16 @@
             <div class="slot-grid" id="slotGrid">
                 <div class="no-slot">Pilih tanggal untuk melihat slot.</div>
             </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:14px;">
+            <button type="button" onclick="pindahHari(-1)" style="
+                flex:1; padding:10px; border-radius:8px; border:1.5px solid #e2e8f0;
+                background:white; font-size:13px; font-weight:600; color:#475569; cursor:pointer;
+            ">← Hari Sebelumnya</button>
+            <button type="button" onclick="pindahHari(1)" style="
+                flex:1; padding:10px; border-radius:8px; border:1.5px solid #0052cc;
+                background:white; font-size:13px; font-weight:600; color:#0052cc; cursor:pointer;
+            ">Hari Berikutnya →</button>
         </div>
     </div>
 
@@ -269,12 +296,15 @@
                     value="{{ old('nomor_hp') }}"
                     inputmode="numeric" autocomplete="off" maxlength="15"
                     class="{{ $errors->has('nomor_hp') ? 'is-invalid' : '' }}"
-                    oninput="formatHP(this)">
+                    oninput="formatHP(this); cekNomor(this)">
                 @error('nomor_hp')
                     <small class="error-msg">{{ $message }}</small>
                 @enderror
             </div>
-
+            <div id="infoBookingSebelumnya" style="display:none; background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#1e40af;">
+                <div style="font-weight:700; margin-bottom:2px;">Nomor ini sudah pernah booking</div>
+                <div id="infoBookingText"></div>
+            </div>
             <div class="selected-detail" id="selectedDetail">
                 <div class="det-top">
                     <span class="det-nama">
@@ -308,18 +338,21 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit" id="btnSubmit" disabled>
+            <button type="button" class="btn-submit" id="btnSubmit" disabled onclick="submitBooking()">
                 Lanjutkan Pembayaran
                 <i class="bi bi-arrow-right"></i>
             </button>
         </div>
+         </div>
     </div>
 
 </div>
+
 </form>
 
 <script>
-const allJadwals = @json($jadwalData);
+const allJadwals = JSON.parse('{!! addslashes(json_encode($jadwalData)) !!}');
+const lapanganId = {{ $lapanganId ?? 'null' }};
 
 let activeDate    = null;
 let selectedSlots = [];
@@ -352,7 +385,9 @@ function renderCalendar() {
 
     const firstDay = new Date(calYear, calMonth, 1).getDay();
     const totalDay = new Date(calYear, calMonth + 1, 0).getDate();
-    const today    = new Date(); today.setHours(0,0,0,0);
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const [ty, tm, td] = todayStr.split('-').map(Number);
+    const today = new Date(ty, tm - 1, td);
 
     for (let i = 0; i < firstDay; i++) {
         const el = document.createElement('div');
@@ -362,9 +397,10 @@ function renderCalendar() {
 
     for (let d = 1; d <= totalDay; d++) {
         const date    = new Date(calYear, calMonth, d);
-        const dateStr = date.toISOString().split('T')[0];
-        const isPast  = date < today;
-        const isToday = date.getTime() === today.getTime();
+        const dateStr = calYear + '-' + String(calMonth + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        const dateLocal = new Date(calYear, calMonth, d);
+        const isPast  = dateLocal < today;
+        const isToday = dateLocal.getTime() === today.getTime();
 
         const el = document.createElement('div');
         el.textContent = d;
@@ -377,15 +413,20 @@ function renderCalendar() {
         grid.appendChild(el);
     }
 }
-
 function pilihTanggal(dateStr, el) {
     activeDate    = dateStr;
     selectedSlots = [];
     document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active'));
     el.classList.add('active');
+
+    document.getElementById('dateInputText').textContent = formatTanggal(dateStr);
+    document.getElementById('dateInputText').style.color = '#10275b';
+
+    document.getElementById('calDropdown').style.display = 'none';
+    document.getElementById('calChevron').style.transform = '';
+
     renderSlots();
     resetSummary();
-    hideWarning();
 }
 
 function renderSlots() {
@@ -397,8 +438,11 @@ function renderSlots() {
         grid.innerHTML = '<div class="no-slot">Pilih tanggal untuk melihat slot.</div>';
         return;
     }
-
-    const slots = allJadwals.filter(j => String(j.tanggal).trim() === String(activeDate).trim());
+   
+    const slots = allJadwals.filter(j =>
+        String(j.tanggal).trim() === String(activeDate).trim() &&
+        (lapanganId === null || j.lapangan_id == lapanganId)
+    );
 
     if (slots.length === 0) {
         grid.innerHTML = '<div class="no-slot">Tidak ada jadwal tersedia pada tanggal ini.</div>';
@@ -430,8 +474,9 @@ function pilihSlot(slot, el) {
     const idx = selectedSlots.findIndex(s => s.id === slot.id);
 
     if (idx !== -1) {
-        if (idx === selectedSlots.length - 1) {
-            selectedSlots.pop();
+        if (idx === selectedSlots.length - 1 || idx === 0) {
+            if (idx === 0) selectedSlots.shift();
+            else selectedSlots.pop();
             el.classList.remove('dipilih');
             updateHiddenInputs();
             updateSummary();
@@ -443,9 +488,27 @@ function pilihSlot(slot, el) {
     }
 
     if (selectedSlots.length > 0) {
-        const last = selectedSlots[selectedSlots.length - 1];
-        if (last.jam_selesai !== slot.jam_mulai) {
+        const last  = selectedSlots[selectedSlots.length - 1];
+        const first = selectedSlots[0];
+
+        const lastDateTime  = new Date(last.tanggal + 'T' + last.jam_selesai);
+        const slotDateTime  = new Date(slot.tanggal + 'T' + slot.jam_mulai);
+        const firstDateTime = new Date(first.tanggal + 'T' + first.jam_mulai);
+        const slotEndTime   = new Date(slot.tanggal + 'T' + slot.jam_selesai);
+
+        const bisaKanan = lastDateTime.getTime() === slotDateTime.getTime();
+        const bisaKiri  = slotEndTime.getTime() === firstDateTime.getTime();
+        if (!bisaKanan && !bisaKiri) {
             showWarning('Slot harus berurutan. Pilih slot yang berdekatan dengan slot terakhir.');
+            return;
+        }
+
+        if (bisaKiri) {
+            selectedSlots.unshift(slot);
+            el.classList.add('dipilih');
+            updateHiddenInputs();
+            updateSummary();
+            hideWarning();
             return;
         }
     }
@@ -456,7 +519,31 @@ function pilihSlot(slot, el) {
     updateSummary();
     hideWarning();
 }
-
+let cekTimer = null;
+function cekNomor(input) {
+    clearTimeout(cekTimer);
+    let nomor = input.value.replace(/[^0-9]/g, '');
+    if (nomor.length < 10) {
+        document.getElementById('nama_pelanggan').readOnly = false;
+        document.getElementById('infoBookingSebelumnya').style.display = 'none';
+        return;
+    }
+    cekTimer = setTimeout(() => {
+        fetch('/pelanggan/cek?nomor=' + nomor)
+            .then(res => res.json())
+            .then(data => {
+                if (data.nama) {
+                    document.getElementById('nama_pelanggan').value = data.nama;
+                    document.getElementById('nama_pelanggan').readOnly = true;
+                    document.getElementById('infoBookingSebelumnya').style.display = 'block';
+                    document.getElementById('infoBookingText').textContent = 'Terima kasih sudah mau booking lagi, ' + data.nama + '!';
+                } else {
+                    document.getElementById('nama_pelanggan').readOnly = false;
+                    document.getElementById('infoBookingSebelumnya').style.display = 'none';
+                }
+            });
+    }, 500);
+}
 function showWarning(msg) {
     const el = document.getElementById('slotWarning');
     document.getElementById('slotWarningMsg').textContent = msg;
@@ -494,8 +581,8 @@ function updateSummary() {
 
     let subtotal = 0, totalSetelahDiskon = 0, adaPromo = false;
     selectedSlots.forEach(slot => {
-        subtotal += slot.harga;
-        totalSetelahDiskon += slot.ada_promo ? slot.harga_promo : slot.harga;
+        subtotal += parseFloat(slot.harga) || 0;
+        totalSetelahDiskon += slot.ada_promo ? (parseFloat(slot.harga_promo) || 0) : (parseFloat(slot.harga) || 0);
         if (slot.ada_promo) adaPromo = true;
     });
 
@@ -543,10 +630,114 @@ function formatRp(num) {
 }
 
 function formatTanggal(dateStr) {
-    const d     = new Date(dateStr);
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date  = new Date(y, m - 1, d);
     const hari  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
     const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    return hari[d.getDay()] + ', ' + d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
+    return hari[date.getDay()] + ', ' + date.getDate() + ' ' + bulan[date.getMonth()] + ' ' + date.getFullYear();
+}
+
+function toggleCalendar() {
+    const dropdown = document.getElementById('calDropdown');
+    const chevron  = document.getElementById('calChevron');
+    const isOpen   = dropdown.style.display === 'block';
+    dropdown.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.datepicker-wrap');
+    if (!wrap.contains(e.target)) {
+        document.getElementById('calDropdown').style.display = 'none';
+        document.getElementById('calChevron').style.transform = '';
+    }
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+    renderCalendar();
+    if (allJadwals.length > 0) {
+        document.getElementById('pageTitle').textContent = 'Jadwal ' + allJadwals[0].nama_lapangan;
+    }
+
+    
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' +
+        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+        String(today.getDate()).padStart(2, '0');
+
+    const todayEl = document.querySelector(`.cal-day.today`);
+    if (todayEl) {
+        pilihTanggal(todayStr, todayEl);
+    }
+});
+
+function submitBooking() {
+    let valid = true;
+
+    const nama = document.getElementById('nama_pelanggan');
+    const hp   = document.getElementById('nomor_hp');
+
+    // Reset error
+    nama.classList.remove('is-invalid');
+    hp.classList.remove('is-invalid');
+    document.querySelectorAll('.error-msg').forEach(e => e.remove());
+
+    if (!nama.value.trim()) {
+        nama.classList.add('is-invalid');
+        const msg = document.createElement('small');
+        msg.className = 'error-msg';
+        msg.textContent = 'Nama lengkap wajib diisi.';
+        nama.parentNode.appendChild(msg);
+        valid = false;
+    }
+
+    if (!hp.value.trim()) {
+        hp.classList.add('is-invalid');
+        const msg = document.createElement('small');
+        msg.className = 'error-msg';
+        msg.textContent = 'Nomor WhatsApp wajib diisi.';
+        hp.parentNode.appendChild(msg);
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    document.getElementById('bookingForm').submit();
+}
+
+function pindahHari(arah) {
+    if (!activeDate) return;
+
+    const [y, m, d] = activeDate.split('-').map(Number);
+    const date = new Date(y, m - 1, d + arah);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (date < today) return;
+
+    const newDateStr = date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+
+    calYear  = date.getFullYear();
+    calMonth = date.getMonth();
+    renderCalendar();
+
+    // Pilih tanggal baru tapi JANGAN reset selectedSlots
+    activeDate = newDateStr;
+    document.querySelectorAll('.cal-day').forEach(el => {
+        el.classList.remove('active');
+        const dayNum = parseInt(el.textContent);
+        if (dayNum === date.getDate() && !el.classList.contains('empty')) {
+            el.classList.add('active');
+        }
+    });
+
+    document.getElementById('dateInputText').textContent = formatTanggal(newDateStr);
+    document.getElementById('dateInputText').style.color = '#10275b';
+
+    renderSlots();
+    hideWarning();
 }
 </script>
 

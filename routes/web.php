@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\JenisLapanganController;
 use App\Http\Controllers\LapanganController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\PromoController;
@@ -46,13 +45,16 @@ Route::get('/syarat-ketentuan', function () {
     return view('pelanggan.syarat');
 })->name('syarat');
 
-Route::get('/jadwal', [LapanganController::class, 'public'])->name('jadwal.public');
+Route::get('/jadwal', [JadwalController::class, 'public'])->name('jadwal.public');
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/cek-status', [BookingController::class, 'cek'])->name('booking.cek');
 Route::post('/cek-status', [BookingController::class, 'cekStatus'])->name('booking.cekStatus');
 
 // Pembayaran (publik karena pelanggan ga login)
+Route::get('/riwayat-pesanan', [BookingController::class, 'riwayatDariSession'])->name('booking.status');
+Route::post('/booking/{bookingId}/batalkan', [BookingController::class, 'batalkan'])->name('booking.batalkan');
+Route::get('/pelanggan/cek', [BookingController::class, 'cekPelanggan'])->name('pelanggan.cek');
 Route::get('/pembayaran/{bookingId}', [PembayaranController::class, 'show'])->name('pembayaran.show');
 Route::post('/pembayaran/{bookingId}/proses', [PembayaranController::class, 'proses'])->name('pembayaran.proses');
 Route::get('/pembayaran/{bookingId}/sukses', [PembayaranController::class, 'sukses'])->name('pembayaran.sukses');
@@ -67,8 +69,6 @@ Route::middleware(['auth.admin'])->prefix('admin')->name('admin.')->group(functi
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Jenis Lapangan
-    Route::resource('jenisLapangan', JenisLapanganController::class);
 
     // Lapangan
     Route::resource('lapangan', LapanganController::class);
@@ -81,6 +81,7 @@ Route::middleware(['auth.admin'])->prefix('admin')->name('admin.')->group(functi
 
     // Booking (admin hanya lihat)
     Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
+    Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
 
     // Notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
@@ -97,3 +98,7 @@ Route::get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->name('dashboard');
 
+Route::get('/test-wa', function () {
+    $result = app(\App\Services\WhatsappService::class)->kirim('085226010639', 'Test pesan Bintang Sport');
+    return response()->json($result);
+});

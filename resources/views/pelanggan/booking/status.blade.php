@@ -239,7 +239,7 @@
 
 <div class="container">
 
-    @php $pelanggan = $bookings->first()->pelanggan; @endphp
+    @php $pelanggan = $bookings->first()->first()->pelanggan; @endphp
 
     <div class="info-grid">
         <div class="info-card">
@@ -264,81 +264,137 @@
     </div>
 
     <div id="bookingList">
-        @forelse($bookings as $booking)
-        @php
-            $status = $booking->status;
-            $isDibatalkan = $status === 'Dibatalkan';
-        @endphp
-        <div class="booking-card {{ $isDibatalkan ? 'dibatalkan' : '' }}" data-status="{{ $status }}">
-            <div class="booking-card-top">
-                <div>
-                    <div class="booking-kode {{ $isDibatalkan ? 'dibatalkan' : '' }}">
-                        #{{ $booking->kode_booking }}
-                        <span class="badge badge-{{ strtolower($status) }}">{{ $status }}</span>
-                    </div>
-                    <div class="booking-nama {{ $isDibatalkan ? 'dibatalkan' : '' }}">
-                        {{ $booking->jadwal->lapangan->nama_lapangan ?? '-' }}
-                    </div>
-                </div>
-                <div>
-                    <div class="booking-total-label">Total Pembayaran</div>
-                    <div class="booking-total-value {{ $isDibatalkan ? 'dibatalkan' : '' }}">
-                        Rp{{ number_format($booking->total_bayar, 0, ',', '.') }}
-                    </div>
-                </div>
+       @forelse($bookings as $kode => $slotBookings)
+@php
+    $booking     = $slotBookings->first();
+    $lastBooking = $slotBookings->last();
+    $status      = $booking->status;
+    $isDibatalkan = $status === 'Dibatalkan';
+    $totalSemua  = $slotBookings->sum('total_bayar');
+    $jamMulai    = \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i');
+    $jamSelesai  = \Carbon\Carbon::parse($lastBooking->jam_selesai)->format('H:i');
+    $jumlahSlot  = $slotBookings->count();
+@endphp
+<div class="booking-card {{ $isDibatalkan ? 'dibatalkan' : '' }}" data-status="{{ $status }}">
+    <div class="booking-card-top">
+        <div>
+            <div class="booking-kode {{ $isDibatalkan ? 'dibatalkan' : '' }}">
+                #{{ $booking->kode_booking }}
+                <span class="badge badge-{{ strtolower($status) }}">{{ $status }}</span>
             </div>
-
-            <div class="booking-meta">
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-calendar-alt"></i> Tanggal</div>
-                    <div class="meta-value">
-                        {{ \Carbon\Carbon::parse($booking->jadwal->tanggal_jadwal)->format('d M Y') }}
-                    </div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-clock"></i> Waktu</div>
-                    <div class="meta-value">
-                        {{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }}-{{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }}
-                    </div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-futbol"></i> Lapangan</div>
-                    <div class="meta-value">{{ $booking->jadwal->lapangan->nama_lapangan ?? '-' }}</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-circle-half-stroke"></i> Status</div>
-                    <div class="meta-value status-{{ strtolower($status) }}">{{ $status }}</div>
-                </div>
+            <div class="booking-nama {{ $isDibatalkan ? 'dibatalkan' : '' }}">
+                {{ $booking->jadwal->lapangan->nama_lapangan ?? '-' }}
             </div>
+        </div>
+        <div>
+            <div class="booking-total-label">Total Pembayaran</div>
+            <div class="booking-total-value {{ $isDibatalkan ? 'dibatalkan' : '' }}">
+                Rp{{ number_format($totalSemua, 0, ',', '.') }}
+            </div>
+        </div>
+    </div>
 
-            <div class="booking-actions">
-                @if($status === 'Tertunda')
-                    <a href="{{ route('pembayaran.show', $booking->id) }}" class="btn-bayar">
-                        Bayar Sekarang <i class="fas fa-arrow-right"></i>
-                    </a>
-                    <button class="btn-outline">Batalkan Pesanan</button>
-                @elseif($status === 'Berhasil')
-                    <a href="{{ route('jadwal.public') }}" class="btn-bayar">
-                        <i class="fas fa-rotate-left"></i> Pesan Lagi
-                    </a>
-                @else
-                    <button class="btn-disabled" disabled>
-                        <i class="fas fa-ban"></i> Batal
-                    </button>
+    <div class="booking-meta">
+        <div class="meta-item">
+            <div class="meta-label"><i class="fas fa-calendar-alt"></i> Tanggal</div>
+            <div class="meta-value">
+                {{ \Carbon\Carbon::parse($booking->jadwal->tanggal_jadwal)->format('d M Y') }}
+            </div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label"><i class="fas fa-clock"></i> Waktu</div>
+            <div class="meta-value">
+                {{ $jamMulai }}-{{ $jamSelesai }}
+                @if($jumlahSlot > 1)
+                    <span style="font-size:11px; color:#64748b;">({{ $jumlahSlot }} slot)</span>
                 @endif
             </div>
         </div>
-        @empty
-        <div class="empty-state">
-            <i class="fas fa-calendar-xmark"></i>
-            Tidak ada riwayat booking.
+        
+        <div class="meta-item">
+            <div class="meta-label"><i class="fas fa-futbol"></i> Lapangan</div>
+            <div class="meta-value">{{ $booking->jadwal->lapangan->nama_lapangan ?? '-' }}</div>
         </div>
-        @endforelse
+        <div class="meta-item">
+            <div class="meta-label"><i class="fas fa-circle-half-stroke"></i> Status</div>
+            <div class="meta-value status-{{ strtolower($status) }}">{{ $status }}</div>
+        </div>
+    </div>
+ @php
+    $allBookings = \App\Models\Booking::with('jadwal.lapangan.jenisLapangan')->where('kode_booking', $booking->kode_booking)->get();
+    $totalSemua  = $allBookings->sum('total_bayar');
+    $subtotal    = $allBookings->sum(fn($b) => $b->jadwal->lapangan->jenisLapangan->harga_per_jam ?? 0);
+    $adaDiskon   = $totalSemua < $subtotal;
+@endphp
+
+<div style="background:#f8fafc; border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:13px;">
+    <div style="display:flex; justify-content:space-between; color:#64748b; margin-bottom:6px;">
+        <span>Subtotal</span>
+        <span>Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
+    </div>
+    @if($adaDiskon)
+    <div style="display:flex; justify-content:space-between; color:#16a34a; margin-bottom:6px;">
+        <span>Diskon Promo</span>
+        <span>-Rp{{ number_format($subtotal - $totalSemua, 0, ',', '.') }}</span>
+    </div>
+    @endif
+    <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
+    <div style="display:flex; justify-content:space-between; font-weight:700; color:#10275b;">
+        <span>Total</span>
+        <span style="color:#0756d9;">Rp{{ number_format($totalSemua, 0, ',', '.') }}</span>
+    </div>
+</div>
+
+<div class="booking-actions">
+        @if($status === 'Tertunda')
+            <a href="{{ route('pembayaran.show', $booking->id) }}" class="btn-bayar">
+                Bayar Sekarang <i class="fas fa-arrow-right"></i>
+            </a>
+            <form action="{{ route('booking.batalkan', $booking->id) }}" method="POST"
+                onsubmit="return konfirmasiBatal(event, this)">
+                @csrf
+                <button type="submit" class="btn-outline">Batalkan Pesanan</button>
+            </form>
+        @elseif($status === 'Berhasil')
+            <a href="{{ route('jadwal.public') }}" class="btn-bayar">
+                <i class="fas fa-rotate-left"></i> Pesan Lagi
+            </a>
+        @else
+            <button class="btn-disabled" disabled>
+                <i class="fas fa-ban"></i> Batal
+            </button>
+        @endif
+    </div>
+</div>
+@empty
+<div class="empty-state">
+    <i class="fas fa-calendar-xmark"></i>
+    Tidak ada riwayat booking.
+</div>
+@endforelse
     </div>
 
 </div>
 
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    function konfirmasiBatal(e, form) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Batalkan Pesanan?',
+            text: 'Pesanan yang dibatalkan tidak dapat dikembalikan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Batalkan',
+            cancelButtonText: 'Tidak',
+            width: 'min(420px, 90vw)',
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
+        });
+    }
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));

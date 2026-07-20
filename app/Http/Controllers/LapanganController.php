@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Jadwal;
 use App\Models\JenisLapangan;
 use App\Models\Lapangan;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
@@ -13,29 +14,24 @@ class LapanganController extends Controller
 {
     public function index()
     {
-        $lapangans = Lapangan::with('jenisLapangan')
-            ->paginate(10);
-
+        $lapangans = Lapangan::with('jenisLapangan')->paginate(10);
         $jenisLapangans = JenisLapangan::all();
 
-        return view(
-            'admin.lapangan.index',
-            compact('lapangans','jenisLapangans')
-        );
+        return view('admin.lapangan.index', compact('lapangans', 'jenisLapangans'));
     }
 
     public function create()
     {
         $jenisLapangans = JenisLapangan::all();
 
-        return view(
-            'admin.lapangan.create',
-            compact('jenisLapangans')
-        );
+        return view('admin.lapangan.create', compact('jenisLapangans'));
     }
 
     public function store(Request $request)
     {
+        if ($request->hasFile('foto_lapangan') && !$request->file('foto_lapangan')->isValid()) {
+            return back()->withErrors(['foto_lapangan' => 'Foto gagal diupload. Ukuran file terlalu besar atau koneksi bermasalah.'])->withInput();
+        }
         if ($request->jam_buka) {
             $request->merge(['jam_buka' => date('H:i', strtotime($request->jam_buka))]);
         }
@@ -44,28 +40,28 @@ class LapanganController extends Controller
         }
 
         $request->validate([
-            'nama_lapangan'   => 'required|string|max:255',
+            'nama_lapangan'     => 'required|string|max:255',
             'jenis_lapangan_id' => 'required|exists:jenis_lapangan,id',
-            'jam_buka'        => 'required|date_format:H:i',
-            'jam_tutup'       => 'required|date_format:H:i|after:jam_buka',
-            'durasi_slot'     => 'required|in:60,120',
-            'foto_lapangan'   => 'required|image|mimes:jpg,jpeg,png|max:5120',
-            'status_lapangan' => 'required|in:aktif,nonaktif',
+            'jam_buka'          => 'required|date_format:H:i',
+            'jam_tutup'         => 'required|date_format:H:i|after:jam_buka',
+            'durasi_slot'       => 'required|in:60,120',
+            'foto_lapangan'     => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'status_lapangan'   => 'required|in:aktif,nonaktif',
         ], [
-            'nama_lapangan.required'   => 'Nama lapangan wajib diisi.',
+            'nama_lapangan.required'      => 'Nama lapangan wajib diisi.',
             'jenis_lapangan_id.required'  => 'Jenis lapangan wajib dipilih.',
-            'jam_buka.required'        => 'Jam buka wajib diisi.',
-            'jam_buka.date_format'     => 'Format jam buka tidak valid.',
-            'jam_tutup.required'       => 'Jam tutup wajib diisi.',
-            'jam_tutup.date_format'    => 'Format jam tutup tidak valid.',
-            'jam_tutup.after'          => 'Jam tutup harus setelah jam buka.',
-            'durasi_slot.required'     => 'Durasi slot wajib dipilih.',
-            'durasi_slot.in'           => 'Durasi slot tidak valid.',
-            'foto_lapangan.required'   => 'Foto lapangan wajib diunggah.',
-            'foto_lapangan.image'      => 'File harus berupa gambar.',
-            'foto_lapangan.mimes'      => 'Format foto harus JPG, JPEG, atau PNG.',
-            'foto_lapangan.max'        => 'Ukuran foto maksimal 5MB.',
-            'status_lapangan.required' => 'Status lapangan wajib dipilih.',
+            'jam_buka.required'           => 'Jam buka wajib diisi.',
+            'jam_buka.date_format'        => 'Format jam buka tidak valid.',
+            'jam_tutup.required'          => 'Jam tutup wajib diisi.',
+            'jam_tutup.date_format'       => 'Format jam tutup tidak valid.',
+            'jam_tutup.after'             => 'Jam tutup harus setelah jam buka.',
+            'durasi_slot.required'        => 'Durasi slot wajib dipilih.',
+            'durasi_slot.in'              => 'Durasi slot tidak valid.',
+            'foto_lapangan.required'      => 'Foto lapangan wajib diunggah.',
+            'foto_lapangan.image'         => 'File harus berupa gambar.',
+            'foto_lapangan.mimes'         => 'Format foto harus JPG, JPEG, atau PNG.',
+            'foto_lapangan.max'           => 'Ukuran foto maksimal 5MB.',
+            'status_lapangan.required'    => 'Status lapangan wajib dipilih.',
         ]);
 
         $data = $request->only([
@@ -98,8 +94,9 @@ class LapanganController extends Controller
     public function edit(Lapangan $lapangan)
     {
         $jenisLapangans = JenisLapangan::all();
+        $promos = $lapangan->promos;
 
-        return view('admin.lapangan.edit', compact('lapangan', 'jenisLapangans'));
+        return view('admin.lapangan.edit', compact('lapangan', 'jenisLapangans', 'promos'));
     }
 
     public function update(Request $request, Lapangan $lapangan)
@@ -112,31 +109,38 @@ class LapanganController extends Controller
         }
 
         $request->validate([
-            'nama_lapangan'   => 'required|string|max:255',
+            'nama_lapangan'     => 'required|string|max:255',
             'jenis_lapangan_id' => 'required|exists:jenis_lapangan,id',
-            'jam_buka'        => 'required|date_format:H:i',
-            'jam_tutup'       => 'required|date_format:H:i|after:jam_buka',
-            'durasi_slot'     => 'required|in:60,120',
-            'foto_lapangan'   => 'required|image|mimes:jpg,jpeg,png|max:5120',
-            'status_lapangan' => 'required|in:aktif,nonaktif',
+            'harga_per_jam'     => 'required|numeric|min:30000',
+            'jam_buka'          => 'required|date_format:H:i',
+            'jam_tutup'         => 'required|date_format:H:i|after:jam_buka',
+            'durasi_slot'       => 'required|in:60,120',
+            'foto_lapangan'     => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'status_lapangan'   => 'required|in:aktif,nonaktif',
         ], [
-            'nama_lapangan.required'   => 'Nama lapangan wajib diisi.',
-            'jenis_lapangan_id.required'  => 'Jenis lapangan wajib dipilih.',
-            'jam_buka.required'        => 'Jam buka wajib diisi.',
-            'jam_buka.date_format'     => 'Format jam buka tidak valid.',
-            'jam_tutup.required'       => 'Jam tutup wajib diisi.',
-            'jam_tutup.date_format'    => 'Format jam tutup tidak valid.',
-            'jam_tutup.after'          => 'Jam tutup harus setelah jam buka.',
-            'durasi_slot.required'     => 'Durasi slot wajib dipilih.',
-            'durasi_slot.in'           => 'Durasi slot tidak valid.',
-            'foto_lapangan.required'   => 'Foto lapangan wajib diunggah.',
-            'foto_lapangan.image'      => 'File harus berupa gambar.',
-            'foto_lapangan.mimes'      => 'Format foto harus JPG, JPEG, atau PNG.',
-            'foto_lapangan.max'        => 'Ukuran foto maksimal 5MB.',
-            'status_lapangan.required' => 'Status lapangan wajib dipilih.',
+            'nama_lapangan.required'     => 'Nama lapangan wajib diisi.',
+            'jenis_lapangan_id.required' => 'Jenis lapangan wajib dipilih.',
+            'harga_per_jam.required'     => 'Harga wajib diisi.',
+            'harga_per_jam.numeric'      => 'Harga harus berupa angka.',
+            'harga_per_jam.min'           => 'Harga per jam minimal Rp 30.000.',
+            'jam_buka.required'          => 'Jam buka wajib diisi.',
+            'jam_buka.date_format'       => 'Format jam buka tidak valid.',
+            'jam_tutup.required'         => 'Jam tutup wajib diisi.',
+            'jam_tutup.date_format'      => 'Format jam tutup tidak valid.',
+            'jam_tutup.after'            => 'Jam tutup harus setelah jam buka.',
+            'durasi_slot.required'       => 'Durasi slot wajib dipilih.',
+            'foto_lapangan.image'        => 'File harus berupa gambar.',
+            'foto_lapangan.mimes'        => 'Format foto harus JPG, JPEG, atau PNG.',
+            'foto_lapangan.max'          => 'Ukuran foto maksimal 5MB.',
+            'status_lapangan.required'   => 'Status lapangan wajib dipilih.',
         ]);
 
-        // Cek perubahan SEBELUM update
+        if ($lapangan->jenisLapangan) {
+            $lapangan->jenisLapangan->update([
+                'harga_per_jam' => $request->harga_per_jam,
+            ]);
+        }
+
         $jadwalBerubah = $lapangan->jam_buka !== $request->jam_buka
             || $lapangan->jam_tutup !== $request->jam_tutup
             || (int)$lapangan->durasi_slot !== (int)$request->durasi_slot;
@@ -161,26 +165,25 @@ class LapanganController extends Controller
 
         $lapangan->update($data);
 
-        // Kalau dinonaktifkan: hapus jadwal Tersedia ke depan
         if ($statusLama === 'aktif' && $statusBaru === 'nonaktif') {
             Jadwal::where('lapangan_id', $lapangan->id)
                 ->where('status_jadwal', 'Tersedia')
                 ->where('tanggal_jadwal', '>=', now()->toDateString())
                 ->delete();
-        }
-
-        // Kalau diaktifkan kembali: generate jadwal lagi
-        elseif ($statusLama === 'nonaktif' && $statusBaru === 'aktif') {
+        } elseif ($statusLama === 'nonaktif' && $statusBaru === 'aktif') {
             $this->generateJadwal($lapangan);
-        }
-
-        // Kalau tetap aktif tapi jam/durasi berubah: hapus Tersedia ke depan lalu generate ulang
-        elseif ($statusBaru === 'aktif' && $jadwalBerubah) {
+        } elseif ($statusBaru === 'aktif' && $jadwalBerubah) {
             Jadwal::where('lapangan_id', $lapangan->id)
                 ->where('status_jadwal', 'Tersedia')
                 ->where('tanggal_jadwal', '>=', now()->toDateString())
                 ->delete();
             $this->generateJadwal($lapangan);
+        }
+
+        if ($request->has('status_promo')) {
+            foreach ($request->status_promo as $promoId => $status) {
+                Promo::where('id', $promoId)->update(['status_promo' => $status]);
+            }
         }
 
         return redirect()->route('admin.lapangan.index')
@@ -206,26 +209,18 @@ class LapanganController extends Controller
 
     public function public(Request $request)
     {
-        $kategori = strtolower($request->query('kategori', 'all'));
-
-        $lapangans = Lapangan::with('jenisLapangan')
-            ->when($kategori != 'all', function ($query) use ($kategori) {
-                $query->whereHas('jenisLapangan', function ($q) use ($kategori) {
-                    $q->whereRaw('LOWER(nama_jenis_lapangan) = ?', [$kategori]);
-                });
-            })
-            ->orderBy('nama_lapangan')
-            ->get();
+        $kategori  = $request->query('kategori', 'all');
+        $lapangans = Lapangan::with('jenisLapangan')->orderBy('nama_lapangan')->get();
 
         return view('pelanggan.jadwal.index', compact('lapangans', 'kategori'));
     }
 
     public function lapanganPage()
-{
-    $jenisLapangans = JenisLapangan::all()->keyBy('nama_jenis_lapangan');
+    {
+        $jenisLapangans = JenisLapangan::all()->keyBy('nama_jenis_lapangan');
 
-    return view('pelanggan.lapanganPage', compact('jenisLapangans'));
-}
+        return view('pelanggan.lapanganPage', compact('jenisLapangans'));
+    }
 
     public function generateJadwal(Lapangan $lapangan)
     {

@@ -15,7 +15,7 @@ class JadwalController extends Controller
 
         $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
 
-       $jadwals = Jadwal::with(['lapangan.promos' => function($q) {
+        $jadwals = Jadwal::with(['lapangan.promos' => function($q) {
             $q->withPivot('slots');
         }, 'bookings.pelanggan'])
             ->where('tanggal_jadwal', $tanggal)
@@ -43,13 +43,17 @@ class JadwalController extends Controller
             ->with('success', 'Slot jadwal berhasil dihapus.');
     }
 
-    public function public()
-{
-    $jadwals = Jadwal::with('lapangan.jenisLapangan')
-        ->where('tanggal_jadwal', '>=', now()->toDateString())
-        ->orderBy('tanggal_jadwal')
-        ->get();
+   public function public(Request $request)
+    {
+        $kategori = $request->kategori ?? 'all';
 
-    return view('pelanggan.jadwal.index', compact('jadwals'));
-}
+        $lapangans = Lapangan::with('jenisLapangan')->orderBy('nama_lapangan')->get();
+       
+        $jadwals = Jadwal::with('lapangan')
+            ->where('tanggal_jadwal', '>=', now()->toDateString())
+            ->orderBy('tanggal_jadwal')
+            ->get();
+
+        return view('pelanggan.jadwal.index', compact('jadwals', 'lapangans', 'kategori'));
+    }
 }

@@ -143,48 +143,44 @@
      style="border-bottom:1px solid #f0f4ff;">
 
     <div class="d-flex gap-3 flex-wrap">
-
         <div>
             <label class="form-label">Tanggal Awal</label>
-            <input type="date"
-                   class="form-control"
-                   name="tanggal_awal"
-                   value="{{ $tanggalAwal }}">
+            <input type="date" class="form-control" name="tanggal_awal"
+                id="tanggalAwal"
+                value="{{ $tanggalAwal }}"
+                onchange="setMinTanggalAkhir(this.value)">
         </div>
-
         <div>
             <label class="form-label">Tanggal Akhir</label>
-            <input type="date"
-                   class="form-control"
-                   name="tanggal_akhir"
-                   value="{{ $tanggalAkhir }}">
+            <input type="date" class="form-control" name="tanggal_akhir"
+                id="tanggalAkhir"
+                value="{{ $tanggalAkhir }}"
+                min="{{ $tanggalAwal }}">
         </div>
-
+        <div>
+            <label class="form-label">Tampilkan</label>
+            <select name="per_page" class="form-select" onchange="this.form.submit()">
+                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20</option>
+                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+            </select>
+        </div>
         <div class="d-flex gap-2 align-self-end">
             <button type="submit" class="btn-primary-custom">
-                <i class="fas fa-search"></i>
-                Filter
+                <i class="fas fa-search"></i> Filter
             </button>
-
             @if(request()->hasAny(['tanggal_awal','tanggal_akhir']))
-                <a href="{{ route('admin.laporan.index') }}"
-                   class="btn btn-light rounded-3">
+                <a href="{{ route('admin.laporan.index') }}" class="btn btn-light rounded-3">
                     <i class="fas fa-rotate-left"></i>
                 </a>
             @endif
         </div>
-
     </div>
 
-    <a href="{{ route('admin.laporan.exportPdf',[
-        'tanggal_awal'=>$tanggalAwal,
-        'tanggal_akhir'=>$tanggalAkhir
-    ]) }}"
+    <a href="{{ route('admin.laporan.exportPdf', ['tanggal_awal'=>$tanggalAwal,'tanggal_akhir'=>$tanggalAkhir]) }}"
        class="btn-primary-custom">
-        <i class="fas fa-file-pdf"></i>
-        Export PDF
+        <i class="fas fa-file-pdf"></i> Export PDF
     </a>
-
 </div>
 
 </form>
@@ -213,6 +209,8 @@
             <th>Total</th>
 
             <th>Status</th>
+
+            <th>Aksi</th>
 
         </tr>
 
@@ -268,6 +266,13 @@
 
             </td>
 
+            <td>
+                <a href="{{ route('admin.booking.show', $booking->id) }}" 
+                class="btn-detail" title="Detail">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </td>
+
         </tr>
 
         @empty
@@ -296,17 +301,14 @@
 </div>
 
 @if($bookings->count())
-
-<div class="px-4 py-3"
+<div class="d-flex justify-content-between align-items-center px-4 py-3"
      style="border-top:1px solid #f0f4ff;">
-
     <small class="text-muted">
-        Total Data :
-        <strong>{{ $bookings->count() }}</strong>
+        Menampilkan {{ $bookings->firstItem() }}-{{ $bookings->lastItem() }}
+        dari {{ $bookings->total() }} data
     </small>
-
+    {{ $bookings->links('pagination::bootstrap-5') }}
 </div>
-
 @endif
 
 </div>
@@ -365,6 +367,40 @@
         overflow:hidden;
     }
 
+    .btn-detail {
+        border: none;
+        border-radius: 8px;
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+        background: #fff3e0;
+        color: #e65100;
+    }
+    .btn-detail:hover { background: #e65100; color: #fff; }
+
 </style>
+@endpush 
+@push('scripts')
+<script>
+function setMinTanggalAkhir(val) {
+    const tglAkhir = document.getElementById('tanggalAkhir');
+    if (val) {
+        tglAkhir.disabled = false;
+        tglAkhir.min = val;
+        if (tglAkhir.value && tglAkhir.value < val) {
+            tglAkhir.value = '';
+        }
+    } else {
+        tglAkhir.disabled = true;
+        tglAkhir.value = '';
+    }
+}
+</script>
 
 @endpush

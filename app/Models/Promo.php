@@ -32,8 +32,7 @@ class Promo extends Model
 
     public function isAktif()
     {
-        return $this->status_promo
-            && now()->between($this->tanggal_mulai, $this->tanggal_berakhir);
+         return $this->status_promo;
     }
 
     public function berakhirMingguIni()

@@ -353,9 +353,32 @@ setTimeout(() => {
             </tbody>
         </table>
     </div>
-    <div class="px-4 py-3">
-        {{ $bookingTerbaru->links('pagination::bootstrap-5') }}
+    <div class="px-4 py-3 d-flex align-items-center justify-content-between">
+    <div style="font-size:13px; color:#64748b;">
+        Menampilkan {{ $bookingTerbaru->firstItem() }}-{{ $bookingTerbaru->lastItem() }} dari {{ $bookingTerbaru->total() }} data
     </div>
+    <div style="display:flex; gap:6px; align-items:center;">
+        @if($bookingTerbaru->onFirstPage())
+            <span style="padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0; color:#cbd5e1; font-size:13px; font-weight:600;">‹</span>
+        @else
+            <a href="{{ $bookingTerbaru->previousPageUrl() }}" style="padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0; color:#475569; font-size:13px; font-weight:600; text-decoration:none;">‹</a>
+        @endif
+
+        @foreach($bookingTerbaru->getUrlRange(1, $bookingTerbaru->lastPage()) as $page => $url)
+            @if($page == $bookingTerbaru->currentPage())
+                <span style="padding:6px 12px; border-radius:8px; background:#1565C0; color:white; font-size:13px; font-weight:600;">{{ $page }}</span>
+            @else
+                <a href="{{ $url }}" style="padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0; color:#475569; font-size:13px; font-weight:600; text-decoration:none;">{{ $page }}</a>
+            @endif
+        @endforeach
+
+        @if($bookingTerbaru->hasMorePages())
+            <a href="{{ $bookingTerbaru->nextPageUrl() }}" style="padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0; color:#475569; font-size:13px; font-weight:600; text-decoration:none;">›</a>
+        @else
+            <span style="padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0; color:#cbd5e1; font-size:13px; font-weight:600;">›</span>
+        @endif
+    </div>
+</div>
 </div>
 
 @endsection

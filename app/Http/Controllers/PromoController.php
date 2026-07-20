@@ -11,10 +11,7 @@ class PromoController extends Controller
 {
     public function index(Request $request)
     {
-        $totalAktif = Promo::where('status_promo', true)
-            ->whereDate('tanggal_mulai', '<=', now())
-            ->whereDate('tanggal_berakhir', '>=', now())
-            ->count();
+       $totalAktif = Promo::where('status_promo', true)->count();
 
         $berakhirMingguIni = Promo::where('status_promo', true)
             ->whereDate('tanggal_berakhir', '>=', now())
@@ -30,27 +27,23 @@ class PromoController extends Controller
         }
 
         if ($request->filled('status')) {
-            if ($request->status === 'aktif') {
-                $query->where('status_promo', true)
-                    ->whereDate('tanggal_mulai', '<=', now())
-                    ->whereDate('tanggal_berakhir', '>=', now());
+            if ($request->status == 'aktif') {
+                $query->where('status_promo', true);
             } else {
-                $query->where(function($q) {
-                    $q->where('status_promo', false)
-                    ->orWhereDate('tanggal_berakhir', '<', now());
-                });
+               $query->where('status_promo', false);
+
             }
         }
 
         if ($request->filled('lapangan')) {
             $query->whereHas('lapangans', fn($q) =>
-                $q->where('lapangan.id', $request->lapangan)
+                $q->where('lapangan_promo.lapangan_id', $request->lapangan)
             );
         }
 
         $promos = $query->paginate(10)->appends($request->query());
 
-        $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
+        $lapangans = Lapangan::with('jenisLapangan')->where('status_lapangan', 'aktif')->get();
 
         return view('admin.promo.index', compact(
             'totalAktif',
@@ -63,7 +56,7 @@ class PromoController extends Controller
 
     public function create()
     {
-        $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
+        $lapangans = Lapangan::with('jenisLapangan')->where('status_lapangan', 'aktif')->get();
         return view('admin.promo.create', compact('lapangans'));
     }
 
@@ -108,7 +101,7 @@ class PromoController extends Controller
             'diskon_persen'    => $request->diskon_persen,
             'tanggal_mulai'    => $request->tanggal_mulai,
             'tanggal_berakhir' => $request->tanggal_berakhir,
-            'status_promo'     => true,
+             'status_promo'     => $request->input('status_promo') == '1' ? true : false,
         ]);
 
         foreach ($request->lapangan_ids as $lapanganId) {
@@ -124,10 +117,10 @@ class PromoController extends Controller
             ->with('success', 'Promo berhasil ditambahkan!');
     }
 
-    public function edit($id)
+   public function edit($id)
     {
         $promo     = Promo::with('lapangans')->findOrFail($id);
-        $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
+        $lapangans = Lapangan::with('jenisLapangan')->where('status_lapangan', 'aktif')->get();
         return view('admin.promo.edit', compact('promo', 'lapangans'));
     }
 
@@ -165,6 +158,7 @@ class PromoController extends Controller
             'diskon_persen'    => $request->diskon_persen,
             'tanggal_mulai'    => $request->tanggal_mulai,
             'tanggal_berakhir' => $request->tanggal_berakhir,
+            'status_promo' => $request->input('status_promo') == '1' ? true : false,
         ]);
 
         LapanganPromo::where('promo_id', $promo->id)->delete();

@@ -24,14 +24,30 @@ class LaporanRekapitulasiController extends Controller
 
     public function index(Request $request)
     {
-        $tanggalAwal  = $request->tanggal_awal ?? now()->startOfMonth()->toDateString();
-        $tanggalAkhir = $request->tanggal_akhir ?? now()->toDateString();
+       $tanggalAwal  = $request->tanggal_awal ?? now()->toDateString();
+        $tanggalAkhir = $request->tanggal_akhir ?? now()->addDay()->toDateString();
+        $perPage      = $request->get('per_page', 10);
 
-        $bookings = $this->getBookings($tanggalAwal, $tanggalAkhir);
+        if ($tanggalAwal && $tanggalAkhir) {
+            $allBookings = $this->getBookings($tanggalAwal, $tanggalAkhir);
+            $totalBooking    = $allBookings->where('status', 'Berhasil')->count();
+            $totalPendapatan = $allBookings->where('status', 'Berhasil')->sum('total_bayar');
+            $totalPelanggan  = $allBookings->pluck('pelanggan_id')->unique()->count();
 
-        $totalBooking = $bookings->where('status', 'Berhasil')->count();
-        $totalPendapatan = $bookings->where('status', 'Berhasil')->sum('total_bayar');
-        $totalPelanggan = $bookings->pluck('pelanggan_id')->unique()->count();
+            $bookings = Booking::with(['jadwal.lapangan', 'pelanggan', 'pembayaran'])
+                ->whereDate('created_at', '>=', $tanggalAwal)
+                ->whereDate('created_at', '<=', $tanggalAkhir)
+                ->latest()
+                ->paginate($perPage)
+                ->appends($request->query());
+        } else {
+            $totalBooking    = 0;
+            $totalPendapatan = 0;
+            $totalPelanggan  = 0;
+            $bookings = Booking::with(['jadwal.lapangan', 'pelanggan', 'pembayaran'])
+                ->whereRaw('1=0')
+                ->paginate($perPage);
+        }
 
         return view('admin.laporan.index', compact(
             'bookings',
