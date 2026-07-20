@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <title>Booking Lapangan - Bintang Sport</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f4f7fa;
@@ -17,14 +16,14 @@
             display: flex;
             flex-direction: column;
         }
-
         a { text-decoration: none; color: inherit; }
 
-        .navbar {
+        .topbar {
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            padding: 14px 60px;
+            padding: 0 32px;
             width: 100%;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -32,138 +31,83 @@
             top: 0; left: 0;
             z-index: 1000;
         }
-        .navbar .logo img { height: 44px; width: auto; display: block; }
-        .navbar nav { display: flex; gap: 40px; }
-        .navbar nav a { font-weight: 600; font-size: 15px; color: #475569; }
-        .navbar nav a:hover, .navbar nav a.active { color: #0052cc; }
-        .navbar .btn-nav {
-            background: #0756d9;
-            color: #fff;
-            font-weight: 600;
-            font-size: 14px;
-            padding: 10px 22px;
-            border-radius: 24px;
-            white-space: nowrap;
-            transition: 0.2s;
-            box-shadow: 0 5px 11px rgba(7,86,217,0.28);
+        .topbar-logo img { height: 38px; width: auto; display: block; }
+        .topbar-title {
+            font-size: 16px; font-weight: 700; color: #10275b;
+            position: absolute; left: 50%; transform: translateX(-50%);
         }
-        .navbar .btn-nav:hover { background: #0348b9; }
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600; color: #475569;
+            background: #f1f5f9; border-radius: 8px; padding: 8px 16px;
+            text-decoration: none; transition: 0.2s;
+        }
+        .btn-back:hover { background: #e2e8f0; color: #10275b; }
 
         .page-wrapper {
             max-width: 1100px;
-            margin: 100px auto 60px;
+            margin: 84px auto 60px;
             padding: 0 24px;
             display: grid;
             grid-template-columns: 1fr 360px;
             gap: 28px;
             align-items: start;
-            flex: 1;
         }
 
-        .left-title { font-size: 26px; font-weight: 700; color: #03045e; margin-bottom: 4px; }
-        .left-sub { color: #64748b; font-size: 15px; margin-bottom: 20px; }
+        .left-title { font-size: 22px; font-weight: 700; color: #03045e; margin-bottom: 4px; }
+        .left-sub { color: #64748b; font-size: 14px; margin-bottom: 24px; }
 
-        .lapangan-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        .calendar-wrap {
+            background: white; border-radius: 14px;
+            border: 1.5px solid #e2e8f0; padding: 20px; margin-bottom: 20px;
         }
-        .lapangan-tab {
-            padding: 8px 18px;
-            border-radius: 20px;
-            border: 1.5px solid #e2e8f0;
-            background: white;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            cursor: pointer;
-            transition: 0.2s;
+        .cal-header {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 16px;
         }
-        .lapangan-tab:hover { border-color: #0052cc; color: #0052cc; }
-        .lapangan-tab.active {
-            background: #0052cc;
-            border-color: #0052cc;
-            color: white;
+        .cal-title { font-size: 15px; font-weight: 700; color: #03045e; }
+        .cal-nav { display: flex; gap: 6px; }
+        .cal-nav button {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1.5px solid #e2e8f0; background: white;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; color: #475569; font-size: 14px; transition: 0.2s;
         }
+        .cal-nav button:hover { background: #f1f5f9; }
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            gap: 4px; text-align: center;
+        }
+        .cal-day-name {
+            font-size: 11px; font-weight: 600; color: #94a3b8;
+            text-transform: uppercase; padding: 4px 0;
+        }
+        .cal-day {
+            padding: 8px 4px; border-radius: 8px; font-size: 13px;
+            font-weight: 600; color: #10275b; cursor: pointer;
+            transition: 0.15s; border: 1.5px solid transparent;
+        }
+        .cal-day:hover:not(.empty):not(.past) { border-color: #0052cc; color: #0052cc; }
+        .cal-day.empty { cursor: default; }
+        .cal-day.past { color: #cbd5e1; cursor: not-allowed; }
+        .cal-day.active { background: #0052cc; color: white !important; border-color: #0052cc; }
+        .cal-day.today:not(.active) { border-color: #0052cc; color: #0052cc; }
 
-        .month-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
+        .slot-warning {
+            background: #fef3c7; color: #d97706; border: 1px solid #fcd34d;
+            border-radius: 8px; padding: 10px 14px; font-size: 13px;
+            font-weight: 600; margin-bottom: 12px; display: none;
+            align-items: center; gap: 8px;
         }
-        .month-select-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 8px 14px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #10275b;
-        }
-        .month-select-wrap i { color: #0052cc; }
-        .month-select-wrap select {
-            border: none;
-            outline: none;
-            font-weight: 600;
-            font-size: 14px;
-            color: #10275b;
-            background: transparent;
-            cursor: pointer;
-        }
-        .nav-arrows { display: flex; gap: 8px; }
-        .nav-arrows button {
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            border: 1.5px solid #e2e8f0;
-            background: white;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: #475569;
-            transition: 0.2s;
-        }
-        .nav-arrows button:hover { background: #f1f5f9; }
-
-        .week-strip {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 2px;
-        }
-        .day-btn {
-            flex: 0 0 auto;
-            min-width: 62px;
-            padding: 10px 8px;
-            border-radius: 10px;
-            border: 1.5px solid #e2e8f0;
-            background: white;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .day-btn .day-name { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-        .day-btn .day-num { font-size: 20px; font-weight: 700; color: #10275b; margin-top: 2px; }
-        .day-btn:hover { border-color: #0052cc; }
-        .day-btn.active { background: #0052cc; border-color: #0052cc; }
-        .day-btn.active .day-name, .day-btn.active .day-num { color: white; }
+        .slot-warning.show { display: flex; }
 
         .slot-panel {
-            background: white;
-            border-radius: 14px;
-            border: 1.5px solid #e2e8f0;
-            padding: 20px;
+            background: white; border-radius: 14px;
+            border: 1.5px solid #e2e8f0; padding: 20px;
         }
         .slot-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
         }
         .slot-header h3 { font-size: 15px; font-weight: 700; color: #03045e; }
         .legend { display: flex; gap: 14px; align-items: center; font-size: 12px; color: #64748b; flex-wrap: wrap; }
@@ -173,20 +117,10 @@
         .dot-penuh { background: #cbd5e1; }
         .dot-dipilih { background: #0052cc; }
 
-        .slot-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
+        .slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .slot-card {
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 12px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            background: white;
-            position: relative;
+            border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 10px;
+            text-align: center; cursor: pointer; transition: 0.2s; background: white;
         }
         .slot-card:hover:not(.penuh) { border-color: #0052cc; }
         .slot-card.penuh { background: #f1f5f9; cursor: not-allowed; border-color: #e2e8f0; }
@@ -204,74 +138,40 @@
         .slot-card .harga { font-size: 12px; font-weight: 600; color: #475569; margin-top: 1px; }
         .slot-card.penuh .harga { color: #cbd5e1; }
         .slot-card.dipilih .harga { color: #e0f2fe; }
-
-        .no-slot { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 14px; }
+        .no-slot { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 14px; grid-column: 1/-1; }
 
         .summary-card {
-            background: white;
-            border-radius: 16px;
-            border: 1.5px solid #e2e8f0;
-            padding: 24px;
-            position: sticky;
-            top: 90px;
+            background: white; border-radius: 16px;
+            border: 1.5px solid #e2e8f0; padding: 24px; position: sticky; top: 84px;
         }
         .summary-card h2 { font-size: 17px; font-weight: 700; color: #03045e; margin-bottom: 20px; }
-
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
         .form-group input {
-            width: 100%;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 11px 14px;
-            font-size: 14px;
-            outline: none;
-            transition: border 0.2s, box-shadow 0.2s;
-            color: #10275b;
+            width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px;
+            padding: 11px 14px; font-size: 14px; outline: none;
+            transition: border 0.2s, box-shadow 0.2s; color: #10275b;
         }
         .form-group input:focus { border-color: #0052cc; box-shadow: 0 0 0 3px rgba(0,82,204,0.12); }
         .form-group input.is-invalid { border-color: #dc2626; }
         .error-msg { color: #dc2626; font-size: 12px; margin-top: 4px; display: block; }
 
-        .phone-wrap {
-            display: flex;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: border 0.2s, box-shadow 0.2s;
-        }
-        .phone-wrap:focus-within { border-color: #0052cc; box-shadow: 0 0 0 3px rgba(0,82,204,0.12); }
-        .phone-prefix {
-            background: #f8fafc; padding: 11px 12px; font-size: 14px;
-            font-weight: 600; color: #475569; border-right: 1.5px solid #e2e8f0; white-space: nowrap;
-        }
-        .phone-wrap input {
-            border: none; border-radius: 0; flex: 1;
-            padding: 11px 12px; font-size: 14px; outline: none; color: #10275b;
-        }
-        .phone-wrap.is-invalid { border-color: #dc2626; }
-
         .selected-detail {
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 16px;
-            display: none;
+            border: 1.5px solid #e2e8f0; border-radius: 10px;
+            padding: 14px; margin-bottom: 16px; display: none;
         }
         .selected-detail.show { display: block; }
-        .selected-detail .det-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-        .selected-detail .det-nama { font-size: 14px; font-weight: 700; color: #03045e; display: flex; align-items: center; gap: 8px; }
-        .selected-detail .det-nama i { color: #0052cc; }
-        .selected-detail .det-harga { font-size: 14px; font-weight: 700; color: #0052cc; }
-        .selected-detail .det-info { font-size: 12px; color: #64748b; margin-top: 2px; }
+        .det-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+        .det-nama { font-size: 14px; font-weight: 700; color: #03045e; display: flex; align-items: center; gap: 8px; }
+        .det-nama i { color: #0052cc; }
+        .det-harga { font-size: 14px; font-weight: 700; color: #0052cc; }
+        .det-info { font-size: 12px; color: #64748b; margin-top: 2px; }
 
         .divider { border: none; border-top: 1px solid #e2e8f0; margin: 16px 0; }
-
         .price-row { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 8px; }
         .price-row.diskon { color: #16a34a; }
         .price-row.total { font-size: 15px; font-weight: 700; color: #03045e; margin-top: 4px; }
         .price-row.total .total-val { color: #0052cc; font-size: 16px; }
-
         .price-placeholder { text-align: center; padding: 16px 0; color: #94a3b8; font-size: 13px; }
 
         .btn-submit {
@@ -283,105 +183,49 @@
         .btn-submit:hover { background: #003d99; }
         .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        .footer {
-            background: #03045e; color: #f4f7fa;
-            padding: 50px 40px 30px; margin-top: 60px;
-        }
-        .footer-inner {
-            max-width: 1100px; margin: 0 auto;
-            display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 30px;
-        }
-        .footer .brand-logo img { height: 60px; margin-bottom: 12px; }
-        .footer .tagline { font-size: 14px; color: #cbd5e1; max-width: 380px; }
-        .footer h3 { font-size: 18px; font-weight: 700; color: white; margin-bottom: 16px; }
-        .footer ul { list-style: none; }
-        .footer ul li { margin-bottom: 12px; }
-        .footer ul li a { color: #cbd5e1; font-size: 15px; transition: color 0.2s; }
-        .footer ul li a:hover { color: white; }
-        .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.15);
-            margin-top: 40px; padding-top: 20px;
-            text-align: center; font-size: 14px; color: #cbd5e1;
-        }
-
         @media (max-width: 900px) {
             .page-wrapper { grid-template-columns: 1fr; }
             .summary-card { position: static; }
         }
         @media (max-width: 700px) {
-            .navbar { padding: 14px 20px; }
-            .navbar nav { display: none; }
+            .topbar { padding: 0 16px; }
             .slot-grid { grid-template-columns: repeat(2, 1fr); }
-            .footer-inner { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <a href="{{ url('/beranda') }}" class="logo">
+<div class="topbar">
+    <a href="{{ url('/beranda') }}" class="topbar-logo">
         <img src="{{ asset('img/logo.png') }}" alt="Bintang Sport" />
     </a>
-    <nav>
-        <a href="{{ url('/beranda') }}">Beranda</a>
-        <a href="{{ url('/lapangan') }}">Lapangan</a>
-        <a href="{{ route('jadwal.public') }}" class="active">Jadwal</a>
-        <a href="{{ route('booking.cek') }}">Riwayat</a>
-    </nav>
-    <a href="{{ route('booking.create') }}" class="btn-nav">Booking Sekarang</a>
+    <div class="topbar-title">Booking Lapangan</div>
+    <a href="{{ route('jadwal.public') }}" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
 </div>
 
 <form action="{{ route('booking.store') }}" method="POST" id="bookingForm">
 @csrf
-<input type="hidden" name="jadwal_id" id="selected_jadwal_id">
+<div id="hidden_jadwal_inputs"></div>
 
 <div class="page-wrapper">
 
     {{-- KIRI --}}
     <div>
         <h1 class="left-title" id="pageTitle">Jadwal Lapangan</h1>
-        <p class="left-sub">Pilih waktu yang tersedia untuk mulai berolahraga hari ini.</p>
+        <p class="left-sub">Pilih tanggal dan waktu yang tersedia.</p>
 
-        @php
-            $lapangans = $jadwals->pluck('lapangan')->unique('id')->values();
-        @endphp
-        <div class="lapangan-tabs">
-            @foreach($lapangans as $i => $lap)
-                <button type="button"
-                    class="lapangan-tab {{ $i === 0 ? 'active' : '' }}"
-                    data-lapangan-id="{{ $lap->id }}"
-                    onclick="pilihLapangan({{ $lap->id }}, '{{ $lap->nama_lapangan }}', this)">
-                    {{ $lap->nama_lapangan }}
-                </button>
-            @endforeach
-        </div>
-
-        <div class="month-nav">
-            <div class="month-select-wrap">
-                <i class="fa-regular fa-calendar"></i>
-                <select id="monthSelect" onchange="renderWeek()">
-                    @php
-                        $bulanList = [
-                            1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',
-                            5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',
-                            9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
-                        ];
-                        $now = now();
-                    @endphp
-                    @foreach($bulanList as $num => $nama)
-                        <option value="{{ $num }}" {{ $now->month == $num ? 'selected' : '' }}>
-                            {{ $nama }} {{ $now->year }}
-                        </option>
-                    @endforeach
-                </select>
+        <div class="calendar-wrap">
+            <div class="cal-header">
+                <div class="cal-title" id="calTitle"></div>
+                <div class="cal-nav">
+                    <button type="button" onclick="geserBulan(-1)"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" onclick="geserBulan(1)"><i class="bi bi-chevron-right"></i></button>
+                </div>
             </div>
-            <div class="nav-arrows">
-                <button type="button" onclick="geserMinggu(-1)">&#8249;</button>
-                <button type="button" onclick="geserMinggu(1)">&#8250;</button>
-            </div>
+            <div class="cal-grid" id="calGrid"></div>
         </div>
-
-        <div class="week-strip" id="weekStrip"></div>
 
         <div class="slot-panel">
             <div class="slot-header">
@@ -392,8 +236,12 @@
                     <span><span class="dot dot-dipilih"></span> Dipilih</span>
                 </div>
             </div>
+            <div class="slot-warning" id="slotWarning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span id="slotWarningMsg"></span>
+            </div>
             <div class="slot-grid" id="slotGrid">
-                <div class="no-slot">Pilih lapangan dan tanggal untuk melihat slot.</div>
+                <div class="no-slot">Pilih tanggal untuk melihat slot.</div>
             </div>
         </div>
     </div>
@@ -419,9 +267,7 @@
                 <input type="text" id="nomor_hp" name="nomor_hp"
                     placeholder="Contoh: 0812 3456 7890"
                     value="{{ old('nomor_hp') }}"
-                    inputmode="numeric"
-                    autocomplete="off"
-                    maxlength="15"
+                    inputmode="numeric" autocomplete="off" maxlength="15"
                     class="{{ $errors->has('nomor_hp') ? 'is-invalid' : '' }}"
                     oninput="formatHP(this)">
                 @error('nomor_hp')
@@ -432,7 +278,7 @@
             <div class="selected-detail" id="selectedDetail">
                 <div class="det-top">
                     <span class="det-nama">
-                        <i class="fa-regular fa-futbol"></i>
+                        <i class="bi bi-geo-alt-fill"></i>
                         <span id="detNama">-</span>
                     </span>
                     <span class="det-harga" id="detHargaAsli">-</span>
@@ -451,7 +297,7 @@
                         <span id="subtotalVal">-</span>
                     </div>
                     <div class="price-row diskon" id="diskonRow" style="display:none">
-                        <span>Voucher Diskon</span>
+                        <span>Diskon Promo</span>
                         <span id="diskonVal">-</span>
                     </div>
                     <hr class="divider">
@@ -464,7 +310,7 @@
 
             <button type="submit" class="btn-submit" id="btnSubmit" disabled>
                 Lanjutkan Pembayaran
-                <i class="fa-solid fa-arrow-right"></i>
+                <i class="bi bi-arrow-right"></i>
             </button>
         </div>
     </div>
@@ -472,141 +318,101 @@
 </div>
 </form>
 
-<div class="footer">
-    <div class="footer-inner">
-        <div class="brand-logo">
-            <img src="{{ asset('img/logo.png') }}" alt="Bintang Sport" />
-            <p class="tagline">Lapangan olahraga dengan fasilitas dan kenyamanan yang berkualitas untuk mendukung gaya hidup sehat Anda.</p>
-        </div>
-        <div>
-            <h3>Menu Cepat</h3>
-            <ul>
-                <li><a href="{{ url('/beranda') }}">Beranda</a></li>
-                <li><a href="{{ url('/lapangan') }}">Lapangan</a></li>
-                <li><a href="{{ route('jadwal.public') }}">Jadwal</a></li>
-                <li><a href="{{ route('booking.cek') }}">Booking Saya</a></li>
-            </ul>
-        </div>
-        <div>
-            <h3>Bantuan</h3>
-            <ul>
-                <li><a href="{{ route('kebijakan') }}">Kebijakan Privasi</a></li>
-                <li><a href="{{ route('syarat') }}">Syarat & Ketentuan</a></li>
-            </ul>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        &copy; {{ date('Y') }} Bintang Sport Center. All rights reserved.
-    </div>
-</div>
-
 <script>
 const allJadwals = @json($jadwalData);
-console.log(allJadwals);
 
-@verbatim
-let activeLapanganId = null;
-let activeLapanganNama = '';
-let activeDate = null;
-let selectedJadwal = null;
-let weekOffset = 0;
+let activeDate    = null;
+let selectedSlots = [];
+let calYear       = new Date().getFullYear();
+let calMonth      = new Date().getMonth();
 
-window.addEventListener('DOMContentLoaded', function() {
-    const firstTab = document.querySelector('.lapangan-tab');
-    if (firstTab) {
-        const id = parseInt(firstTab.dataset.lapanganId);
-        const nama = firstTab.textContent.trim();
-        pilihLapangan(id, nama, firstTab);
-    }
-    renderWeek();
-});
+const HARI_NAMA  = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const BULAN_NAMA = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
-function pilihLapangan(id, nama, el) {
-    activeLapanganId = id;
-    activeLapanganNama = nama;
-    selectedJadwal = null;
-    document.querySelectorAll('.lapangan-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('pageTitle').textContent = 'Jadwal Lapangan ' + nama;
-    renderWeek();
-    resetSummary();
+window.addEventListener('DOMContentLoaded', renderCalendar);
+
+function geserBulan(arah) {
+    calMonth += arah;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    renderCalendar();
 }
 
-function renderWeek() {
-    const monthVal = parseInt(document.getElementById('monthSelect').value);
-    const year = new Date().getFullYear();
-    const startOfMonth = new Date(year, monthVal - 1, 1);
-    const weekStart = new Date(startOfMonth);
-    weekStart.setDate(startOfMonth.getDate() + weekOffset * 7);
-    const strip = document.getElementById('weekStrip');
-    strip.innerHTML = '';
-    const hariNama = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(weekStart);
-        d.setDate(weekStart.getDate() + i);
-        if (d.getMonth() !== monthVal - 1) continue;
-        const dateStr = toLocalDateStr(d);
-        const btn = document.createElement('div');
-        btn.className = 'day-btn' + (activeDate === dateStr ? ' active' : '');
-        btn.innerHTML = `<div class="day-name">${hariNama[d.getDay()]}</div><div class="day-num">${String(d.getDate()).padStart(2,'0')}</div>`;
-        btn.onclick = () => pilihTanggal(dateStr, btn);
-        strip.appendChild(btn);
-    }
-    if (activeDate) renderSlots();
-}
+function renderCalendar() {
+    document.getElementById('calTitle').textContent = BULAN_NAMA[calMonth] + ' ' + calYear;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
 
-function geserMinggu(arah) {
-    weekOffset += arah;
-    renderWeek();
+    HARI_NAMA.forEach(h => {
+        const el = document.createElement('div');
+        el.className = 'cal-day-name';
+        el.textContent = h;
+        grid.appendChild(el);
+    });
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const totalDay = new Date(calYear, calMonth + 1, 0).getDate();
+    const today    = new Date(); today.setHours(0,0,0,0);
+
+    for (let i = 0; i < firstDay; i++) {
+        const el = document.createElement('div');
+        el.className = 'cal-day empty';
+        grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= totalDay; d++) {
+        const date    = new Date(calYear, calMonth, d);
+        const dateStr = date.toISOString().split('T')[0];
+        const isPast  = date < today;
+        const isToday = date.getTime() === today.getTime();
+
+        const el = document.createElement('div');
+        el.textContent = d;
+        el.className = 'cal-day' +
+            (isPast ? ' past' : '') +
+            (isToday ? ' today' : '') +
+            (activeDate === dateStr ? ' active' : '');
+
+        if (!isPast) el.onclick = () => pilihTanggal(dateStr, el);
+        grid.appendChild(el);
+    }
 }
 
 function pilihTanggal(dateStr, el) {
-    activeDate = dateStr;
-    selectedJadwal = null;
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    activeDate    = dateStr;
+    selectedSlots = [];
+    document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active'));
     el.classList.add('active');
     renderSlots();
     resetSummary();
+    hideWarning();
 }
 
 function renderSlots() {
     const grid = document.getElementById('slotGrid');
     grid.innerHTML = '';
-    if (!activeLapanganId || !activeDate) {
-        grid.innerHTML = '<div class="no-slot">Pilih lapangan dan tanggal untuk melihat slot.</div>';
+    hideWarning();
+
+    if (!activeDate) {
+        grid.innerHTML = '<div class="no-slot">Pilih tanggal untuk melihat slot.</div>';
         return;
     }
 
-    console.log("activeLapanganId =", activeLapanganId);
-    console.log("activeDate =", activeDate);
-    console.log(allJadwals);
-    const slots = allJadwals.filter(j => {
-        console.log (
-            "DB:",
-            j.lapangan_id,
-            j.tanggal,
-            "| ACTIVE:",
-            activeLapanganId,
-            activeDate
-    );
+    const slots = allJadwals.filter(j => String(j.tanggal).trim() === String(activeDate).trim());
 
-    return  Number(j.lapangan_id) === Number(activeLapanganId)
-            && String(j.tanggal).trim() === String(activeDate).trim();
-    });
-       
     if (slots.length === 0) {
         grid.innerHTML = '<div class="no-slot">Tidak ada jadwal tersedia pada tanggal ini.</div>';
         return;
     }
+
     slots.forEach(slot => {
-        const isPenuh = slot.status !== 'Tersedia';
-        const isDipilih = selectedJadwal && selectedJadwal.id === slot.id;
-        const card = document.createElement('div');
-        card.className = 'slot-card' + (isPenuh ? ' penuh' : '') + (isDipilih ? ' dipilih' : '');
+        const isPenuh   = slot.status !== 'Tersedia';
+        const isDipilih = selectedSlots.some(s => s.id === slot.id);
+        const card      = document.createElement('div');
+        card.className  = 'slot-card' + (isPenuh ? ' penuh' : '') + (isDipilih ? ' dipilih' : '');
+
         let html = '';
-        if (slot.ada_promo && !isPenuh) {
-            html += `<div class="promo-label">PROMO</div>`;
-        }
+        if (slot.ada_promo && !isPenuh) html += `<div class="promo-label">PROMO</div>`;
         html += `<div class="jam">${slot.jam_mulai}-${slot.jam_selesai}</div>`;
         if (slot.ada_promo) {
             html += `<div class="harga-coret">Rp ${formatRp(slot.harga)}</div>`;
@@ -615,60 +421,117 @@ function renderSlots() {
             html += `<div class="harga">Rp ${formatRp(slot.harga)}</div>`;
         }
         card.innerHTML = html;
-        if (!isPenuh) {
-            card.onclick = () => pilihSlot(slot, card);
-        }
+        if (!isPenuh) card.onclick = () => pilihSlot(slot, card);
         grid.appendChild(card);
     });
 }
 
 function pilihSlot(slot, el) {
-    if (selectedJadwal && selectedJadwal.id === slot.id) {
-        selectedJadwal = null;
-        el.classList.remove('dipilih');
-        resetSummary();
+    const idx = selectedSlots.findIndex(s => s.id === slot.id);
+
+    if (idx !== -1) {
+        if (idx === selectedSlots.length - 1) {
+            selectedSlots.pop();
+            el.classList.remove('dipilih');
+            updateHiddenInputs();
+            updateSummary();
+            hideWarning();
+        } else {
+            showWarning('Hapus slot dari urutan terakhir terlebih dahulu.');
+        }
         return;
     }
-    selectedJadwal = slot;
-    document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('dipilih'));
+
+    if (selectedSlots.length > 0) {
+        const last = selectedSlots[selectedSlots.length - 1];
+        if (last.jam_selesai !== slot.jam_mulai) {
+            showWarning('Slot harus berurutan. Pilih slot yang berdekatan dengan slot terakhir.');
+            return;
+        }
+    }
+
+    selectedSlots.push(slot);
     el.classList.add('dipilih');
-    document.getElementById('selected_jadwal_id').value = slot.id;
+    updateHiddenInputs();
+    updateSummary();
+    hideWarning();
+}
+
+function showWarning(msg) {
+    const el = document.getElementById('slotWarning');
+    document.getElementById('slotWarningMsg').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function hideWarning() {
+    document.getElementById('slotWarning').classList.remove('show');
+}
+
+function updateHiddenInputs() {
+    const container = document.getElementById('hidden_jadwal_inputs');
+    container.innerHTML = '';
+    selectedSlots.forEach(slot => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = 'jadwal_ids[]';
+        input.value = slot.id;
+        container.appendChild(input);
+    });
+}
+
+function updateSummary() {
+    if (selectedSlots.length === 0) { resetSummary(); return; }
+
+    const first = selectedSlots[0];
+    const last  = selectedSlots[selectedSlots.length - 1];
+
     document.getElementById('selectedDetail').classList.add('show');
-    document.getElementById('detNama').textContent = slot.nama_lapangan;
-    document.getElementById('detHargaAsli').textContent = 'Rp ' + formatRp(slot.ada_promo ? slot.harga_promo : slot.harga);
-    document.getElementById('detInfo').textContent = formatTanggal(slot.tanggal) + ' • ' + slot.jam_mulai + '-' + slot.jam_selesai;
-    document.getElementById('pricePlaceholder').style.display = 'none';
-    document.getElementById('priceBreakdown').style.display = 'block';
-    document.getElementById('subtotalVal').textContent = 'Rp ' + formatRp(slot.harga);
-    if (slot.ada_promo) {
-        const selisih = slot.harga - slot.harga_promo;
+    document.getElementById('detNama').textContent = first.nama_lapangan;
+    document.getElementById('detInfo').textContent =
+        formatTanggal(first.tanggal) + ' • ' + first.jam_mulai + '-' + last.jam_selesai +
+        (selectedSlots.length > 1 ? ' (' + selectedSlots.length + ' slot)' : '');
+
+    let subtotal = 0, totalSetelahDiskon = 0, adaPromo = false;
+    selectedSlots.forEach(slot => {
+        subtotal += slot.harga;
+        totalSetelahDiskon += slot.ada_promo ? slot.harga_promo : slot.harga;
+        if (slot.ada_promo) adaPromo = true;
+    });
+
+    document.getElementById('detHargaAsli').textContent        = 'Rp ' + formatRp(totalSetelahDiskon);
+    document.getElementById('pricePlaceholder').style.display  = 'none';
+    document.getElementById('priceBreakdown').style.display    = 'block';
+    document.getElementById('subtotalVal').textContent         = 'Rp ' + formatRp(subtotal);
+
+    if (adaPromo) {
         document.getElementById('diskonRow').style.display = 'flex';
-        document.getElementById('diskonVal').textContent = '-Rp ' + formatRp(selisih);
-        document.getElementById('totalVal').textContent = 'Rp ' + formatRp(slot.harga_promo);
+        document.getElementById('diskonVal').textContent   = '-Rp ' + formatRp(subtotal - totalSetelahDiskon);
     } else {
         document.getElementById('diskonRow').style.display = 'none';
-        document.getElementById('totalVal').textContent = 'Rp ' + formatRp(slot.harga);
     }
-    document.getElementById('btnSubmit').disabled = false;
+
+    document.getElementById('totalVal').textContent   = 'Rp ' + formatRp(totalSetelahDiskon);
+    document.getElementById('btnSubmit').disabled     = false;
 }
 
 function resetSummary() {
-    selectedJadwal = null;
-    document.getElementById('selected_jadwal_id').value = '';
+    selectedSlots = [];
+    document.getElementById('hidden_jadwal_inputs').innerHTML  = '';
     document.getElementById('selectedDetail').classList.remove('show');
-    document.getElementById('pricePlaceholder').style.display = 'block';
-    document.getElementById('priceBreakdown').style.display = 'none';
+    document.getElementById('pricePlaceholder').style.display  = 'block';
+    document.getElementById('priceBreakdown').style.display    = 'none';
     document.getElementById('btnSubmit').disabled = true;
 }
 
 function formatHP(input) {
     let cursorPos = input.selectionStart;
-    let prevLen = input.value.length;
-    let val = input.value.replace(/\D/g, '');
+    let prevLen   = input.value.length;
+    let val       = input.value.replace(/\D/g, '');
     let formatted = '';
-    if (val.length > 0) formatted += val.substring(0, 4);
-    if (val.length > 4) formatted += ' ' + val.substring(4, 8);
-    if (val.length > 8) formatted += ' ' + val.substring(8, 12);
+    if (val.length > 0)  formatted += val.substring(0, 4);
+    if (val.length > 4)  formatted += ' ' + val.substring(4, 8);
+    if (val.length > 8)  formatted += ' ' + val.substring(8, 12);
     if (val.length > 12) formatted += ' ' + val.substring(12, 15);
     input.value = formatted;
     let diff = formatted.length - prevLen;
@@ -679,20 +542,12 @@ function formatRp(num) {
     return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
-function toLocalDateStr(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-}
-
 function formatTanggal(dateStr) {
-    const d = new Date(dateStr);
-    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const d     = new Date(dateStr);
+    const hari  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
     const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
     return hari[d.getDay()] + ', ' + d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
 }
-@endverbatim
 </script>
 
 </body>

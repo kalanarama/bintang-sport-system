@@ -7,31 +7,50 @@
     .stat-card {
         background: white;
         border-radius: 16px;
-        padding: 24px;
+        padding: 20px 16px;     
         box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;               
+        min-width: 0;            
     }
     .stat-icon {
-        width: 52px; height: 52px;
+        width: 48px; height: 48px;  
         border-radius: 14px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 22px;
-        flex-shrink: 0;
+        font-size: 20px;
+        flex-shrink: 0;            
     }
+
+
     .stat-icon.blue   { background: #e8f0fe; color: #1565C0; }
     .stat-icon.green  { background: #e8f5e9; color: #2e7d32; }
     .stat-icon.orange { background: #fff3e0; color: #e65100; }
     .stat-icon.purple { background: #f3e5f5; color: #6a1b9a; }
-    .stat-label { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .stat-value { font-size: 26px; font-weight: 800; color: #1a1a2e; }
+    .stat-label { 
+        font-size: 10px;          
+        color: #64748b; 
+        font-weight: 600; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+        margin-bottom: 4px;
+        word-break: break-word;   
+    }
+    .stat-value { 
+        font-size: 22px;            
+        font-weight: 800; 
+        color: #1a1a2e;
+        word-break: break-all;      
+    }
 
     .section-card {
         background: white;
         border-radius: 16px;
         box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        overflow: hidden;
+        overflow: visible; 
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
     .section-card-header {
         padding: 20px 24px;
@@ -41,15 +60,26 @@
         justify-content: space-between;
     }
     .section-card-header h3 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin: 0; }
-    .section-card-body { padding: 24px; }
+    .section-card-body { 
+        padding: 24px; 
+        overflow: visible;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;  
+    }
 
     /* Chart bars */
     .chart-wrap {
         display: flex;
         align-items: flex-end;
         gap: 10px;
-        height: 120px;
-        padding-bottom: 8px;
+        height: 200px;             
+        padding-bottom: 0;
+        padding-right: 8px;
+        flex: 1;
+        border-bottom: none;      
+        margin-bottom: 0;
     }
     .chart-col {
         flex: 1;
@@ -77,7 +107,11 @@
         align-items: center;
         gap: 16px;
     }
-    .donut-svg { width: 140px; height: 140px; }
+    .donut-svg { 
+        width: 160px; 
+        height: 160px; 
+        overflow: visible; 
+    }
     .donut-legend { width: 100%; }
     .legend-item {
         display: flex;
@@ -152,7 +186,7 @@ setTimeout(() => {
 
 {{-- STAT CARDS --}}
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-3" style="min-width: 0;">
         <div class="stat-card">
             <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
             <div>
@@ -161,7 +195,7 @@ setTimeout(() => {
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" style="min-width: 0;">
         <div class="stat-card">
             <div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
             <div>
@@ -170,7 +204,7 @@ setTimeout(() => {
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" style="min-width: 0;">
         <div class="stat-card">
             <div class="stat-icon orange"><i class="fas fa-table-tennis-paddle-ball"></i></div>
             <div>
@@ -179,7 +213,7 @@ setTimeout(() => {
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" style="min-width: 0;">
         <div class="stat-card">
             <div class="stat-icon purple"><i class="fas fa-tag"></i></div>
             <div>
@@ -198,7 +232,7 @@ setTimeout(() => {
                 <h3>Statistik Booking (7 Hari Terakhir)</h3>
             </div>
             <div class="section-card-body">
-                @php $maxVal = $statsMingguan->max('total') ?: 1; @endphp
+                @php $maxVal = max($statsMingguan->max('total'), 5); @endphp
                 <div class="chart-wrap">
                     @foreach($statsMingguan as $stat)
                         <div class="chart-col">
@@ -275,7 +309,7 @@ setTimeout(() => {
 </div>
 
 {{-- TABEL BOOKING TERBARU --}}
-<div class="section-card">
+<div class="section-card" style="height:fit-content;">
     <div class="section-card-header">
         <h3>Booking Terbaru</h3>
     </div>
@@ -285,7 +319,7 @@ setTimeout(() => {
                 <tr>
                     <th style="border-radius: 0;">No</th>
                     <th>Kode Booking</th>
-                    <th>Tanggal</th>
+                    <th>Tanggal Main</th>
                     <th>Lapangan</th>
                     <th>Pelanggan</th>
                     <th>Total</th>
@@ -318,6 +352,9 @@ setTimeout(() => {
                 @endforelse
             </tbody>
         </table>
+    </div>
+    <div class="px-4 py-3">
+        {{ $bookingTerbaru->links('pagination::bootstrap-5') }}
     </div>
 </div>
 

@@ -15,7 +15,9 @@ class JadwalController extends Controller
 
         $lapangans = Lapangan::where('status_lapangan', 'aktif')->get();
 
-        $jadwals = Jadwal::with(['lapangan.promos', 'bookings.pelanggan'])
+       $jadwals = Jadwal::with(['lapangan.promos' => function($q) {
+            $q->withPivot('slots');
+        }, 'bookings.pelanggan'])
             ->where('tanggal_jadwal', $tanggal)
             ->when($lapanganId, fn($q) => $q->where('lapangan_id', $lapanganId))
             ->orderBy('jam_mulai')

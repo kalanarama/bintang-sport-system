@@ -18,7 +18,7 @@ class PromoController extends Controller
 
         $berakhirMingguIni = Promo::where('status_promo', true)
             ->whereDate('tanggal_berakhir', '>=', now())
-            ->whereDate('tanggal_berakhir', '<=', now()->endOfWeek())
+            ->whereDate('tanggal_berakhir', '<=', now()->addDays(7))
             ->count();
 
         $totalNonaktif = Promo::where('status_promo', false)->count();

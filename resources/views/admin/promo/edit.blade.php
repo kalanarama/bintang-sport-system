@@ -54,7 +54,8 @@
                 <label class="form-label fw-semibold">Tanggal Berakhir <span class="text-danger">*</span></label>
                 <input type="date" name="tanggal_berakhir"
                     class="form-control @error('tanggal_berakhir') is-invalid @enderror"
-                    value="{{ old('tanggal_berakhir', $promo->tanggal_berakhir->format('Y-m-d')) }}">
+                    value="{{ old('tanggal_berakhir', $promo->tanggal_berakhir->format('Y-m-d')) }}"
+                    min="{{ old('tanggal_mulai', $promo->tanggal_mulai->format('Y-m-d')) }}">>
                 @error('tanggal_berakhir')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
@@ -339,6 +340,16 @@
                 tglAkhir.insertAdjacentElement('afterend', el);
             }
             hasError = true;
+        } else if (tglMulai.value && tglAkhir.value < tglMulai.value) {
+            tglAkhir.classList.add('is-invalid');
+            if (!document.getElementById('error-tgl-akhir')) {
+                const el = document.createElement('div');
+                el.id = 'error-tgl-akhir';
+                el.className = 'invalid-feedback d-block';
+                el.textContent = 'Tanggal berakhir tidak boleh sebelum tanggal mulai.';
+                tglAkhir.insertAdjacentElement('afterend', el);
+            }
+            hasError = true;
         } else {
             tglAkhir.classList.remove('is-invalid');
             document.getElementById('error-tgl-akhir')?.remove();
@@ -382,6 +393,14 @@
                 text: `Pilih minimal 1 slot jam untuk lapangan ${lapanganTanpaSlot}.`,
                 confirmButtonColor: '#1565C0'
             });
+        }
+    });
+
+    document.querySelector('[name="tanggal_mulai"]').addEventListener('change', function() {
+        const tglAkhir = document.querySelector('[name="tanggal_berakhir"]');
+        tglAkhir.min = this.value;
+        if (tglAkhir.value && tglAkhir.value < this.value) {
+            tglAkhir.value = '';
         }
     });
 </script>

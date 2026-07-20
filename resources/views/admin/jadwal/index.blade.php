@@ -90,13 +90,14 @@
         border: 1.5px solid transparent;
         position: relative;
     }
-    .slot-cell.tersedia { background: #f0fdf4; border-color: #86efac; }
-    .slot-cell.tersedia:hover { background: #dcfce7; }
-    .slot-cell.penuh { background: #e2e8f0; border-color: #cbd5e1; }
-    .slot-cell.penuh:hover { background: #cbd5e1; }
-    .slot-cell.promo { background: #f0fdf4; border-color: #86efac; }
-    .slot-cell.promo:hover { background: #dcfce7; }
-    .slot-cell.penuh.promo { background: #e2e8f0; border-color: #cbd5e1; }
+    .slot-cell.tersedia { background: #bbf7d0; border-color: #22c55e; }
+    .slot-cell.tersedia:hover { background: #86efac; }
+    .slot-cell.penuh { background: #cbd5e1; border-color: #94a3b8; }
+    .slot-cell.penuh:hover { background: #94a3b8; }
+    .slot-cell.promo { background: #bbf7d0; border-color: #22c55e; }
+    .slot-cell.promo:hover { background: #86efac; }
+    .slot-cell.penuh.promo { background: #cbd5e1; border-color: #94a3b8; }
+    .slot-cell.penuh.promo:hover { background: #94a3b8; }
 
     .promo-badge {
         position: absolute;
@@ -121,8 +122,8 @@
     }
     .legend span { display: flex; align-items: center; gap: 6px; }
     .legend-box { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid; }
-    .lb-tersedia { background: #f0fdf4; border-color: #86efac; }
-    .lb-penuh    { background: #f1f5f9; border-color: #cbd5e1; }
+    .lb-tersedia { background: #bbf7d0; border-color: #22c55e; }
+    .lb-penuh    { background: #cbd5e1; border-color: #94a3b8; }
     .lb-promo    { background: #fffbeb; border-color: #fcd34d; }
 
     .lapangan-tab-btn {
@@ -235,7 +236,7 @@
         <input type="date" name="tanggal" value="{{ $tanggal }}"
             onchange="document.getElementById('filterForm').submit()">
         <select name="lapangan_id" onchange="document.getElementById('filterForm').submit()"
-            style="border:1.5px solid #e0e7ff; border-radius:10px; padding:10px 14px; font-size:14px; background:white; color:#1a1a2e; outline:none;">
+            style="border:1.5px solid #e0e7ff; border-radius:10px; padding:10px 36px 10px 14px; font-size:14px; background:white; color:#1a1a2e; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 12 12%27%3E%3Cpath fill=%27%2364748b%27 d=%27M6 8L1 3h10z%27/%3E%3C/svg%3E'); background-repeat:no-repeat; background-position:right 12px center;">
             <option value="">Semua Lapangan</option>
             @foreach($lapangans as $lap)
                 <option value="{{ $lap->id }}" {{ $lapanganId == $lap->id ? 'selected' : '' }}>
@@ -257,63 +258,61 @@
 </div>
 
 {{-- MODAL POPUP --}}
-<div class="modal-overlay" id="modalOverlay" onclick="cekTutupModal(event)">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3 id="modalTitle">Detail Slot</h3>
-            <button class="modal-close" onclick="tutupModal()">
-                <i class="fas fa-times"></i>
-            </button>
+<div class="modal-overlay" id="modalOverlay" onclick="cekTutupModal(event)"></div>
+<div class="modal-box" id="modalBox" style="display:none;">
+    <div class="modal-header">
+        <h3 id="modalTitle">Detail Slot</h3>
+        <button class="modal-close" onclick="tutupModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="modal-divider">Info Slot</div>
+        <div class="modal-row">
+            <span class="mlabel">Status</span>
+            <span class="mvalue" id="mStatus">-</span>
         </div>
-        <div class="modal-body">
-            <div class="modal-divider">Info Slot</div>
+        <div class="modal-row">
+            <span class="mlabel">Lapangan</span>
+            <span class="mvalue" id="mLapangan">-</span>
+        </div>
+        <div class="modal-row">
+            <span class="mlabel">Tanggal</span>
+            <span class="mvalue" id="mTanggal">-</span>
+        </div>
+        <div class="modal-row">
+            <span class="mlabel">Jam</span>
+            <span class="mvalue" id="mJam">-</span>
+        </div>
+        <div class="modal-row">
+            <span class="mlabel">Durasi</span>
+            <span class="mvalue" id="mDurasi">-</span>
+        </div>
+        <div class="modal-row">
+            <span class="mlabel">Harga</span>
+            <span class="mvalue" id="mHarga">-</span>
+        </div>
+        <div class="modal-row" id="mPromoRow" style="display:none">
+            <span class="mlabel">Promo</span>
+            <span class="mvalue" id="mPromo">-</span>
+        </div>
+        <div id="mPemesanSection">
+            <div class="modal-divider">Dipesan Oleh</div>
             <div class="modal-row">
-                <span class="mlabel">Status</span>
-                <span class="mvalue" id="mStatus">-</span>
+                <span class="mlabel">Nama</span>
+                <span class="mvalue" id="mNama">-</span>
             </div>
             <div class="modal-row">
-                <span class="mlabel">Lapangan</span>
-                <span class="mvalue" id="mLapangan">-</span>
+                <span class="mlabel">No HP</span>
+                <span class="mvalue" id="mHP">-</span>
             </div>
             <div class="modal-row">
-                <span class="mlabel">Tanggal</span>
-                <span class="mvalue" id="mTanggal">-</span>
+                <span class="mlabel">Kode Booking</span>
+                <span class="mvalue" id="mKode">-</span>
             </div>
             <div class="modal-row">
-                <span class="mlabel">Jam</span>
-                <span class="mvalue" id="mJam">-</span>
-            </div>
-            <div class="modal-row">
-                <span class="mlabel">Durasi</span>
-                <span class="mvalue" id="mDurasi">-</span>
-            </div>
-            <div class="modal-row">
-                <span class="mlabel">Harga</span>
-                <span class="mvalue" id="mHarga">-</span>
-            </div>
-            <div class="modal-row" id="mPromoRow" style="display:none">
-                <span class="mlabel">Promo</span>
-                <span class="mvalue" id="mPromo">-</span>
-            </div>
-
-            <div id="mPemesanSection">
-                <div class="modal-divider">Dipesan Oleh</div>
-                <div class="modal-row">
-                    <span class="mlabel">Nama</span>
-                    <span class="mvalue" id="mNama">-</span>
-                </div>
-                <div class="modal-row">
-                    <span class="mlabel">No HP</span>
-                    <span class="mvalue" id="mHP">-</span>
-                </div>
-                <div class="modal-row">
-                    <span class="mlabel">Kode Booking</span>
-                    <span class="mvalue" id="mKode">-</span>
-                </div>
-                <div class="modal-row">
-                    <span class="mlabel">Status Bayar</span>
-                    <span class="mvalue" id="mStatusBayar">-</span>
-                </div>
+                <span class="mlabel">Status Bayar</span>
+                <span class="mvalue" id="mStatusBayar">-</span>
             </div>
         </div>
     </div>
@@ -444,12 +443,13 @@ function tampilModal(event, data) {
         'Tertunda':   '<span class="badge-tertunda">Tertunda</span>',
         'Dibatalkan': '<span class="badge-dibatalkan">Dibatalkan</span>',
     };
-    const modal = document.querySelector('.modal-box');
+
+    const modal   = document.getElementById('modalBox');
     const overlay = document.getElementById('modalOverlay');
     overlay.classList.add('show');
+    modal.style.display = 'block';
 
-
-    const rect = event.currentTarget.getBoundingClientRect();
+    const rect   = event.currentTarget.getBoundingClientRect();
     const modalW = 340;
     const modalH = modal.offsetHeight || 320;
     const winW   = window.innerWidth;
@@ -458,20 +458,18 @@ function tampilModal(event, data) {
     let left = rect.left;
     let top  = rect.bottom + 8;
 
-    
     if (left + modalW > winW - 12) left = winW - modalW - 12;
-  
     if (top + modalH > winH - 12) top = rect.top - modalH - 8;
 
     modal.style.left = left + 'px';
     modal.style.top  = top  + 'px';
 
-    document.getElementById('modalTitle').textContent   = data.lapangan + ' | ' + data.jam;
-    document.getElementById('mStatus').innerHTML        = statusMap[data.status] || data.status;
-    document.getElementById('mLapangan').textContent    = data.lapangan;
-    document.getElementById('mTanggal').textContent     = data.tanggal;
-    document.getElementById('mJam').textContent         = data.jam;
-    document.getElementById('mDurasi').textContent      = data.durasi;
+    document.getElementById('modalTitle').textContent  = data.lapangan + ' | ' + data.jam;
+    document.getElementById('mStatus').innerHTML       = statusMap[data.status] || data.status;
+    document.getElementById('mLapangan').textContent   = data.lapangan;
+    document.getElementById('mTanggal').textContent    = data.tanggal;
+    document.getElementById('mJam').textContent        = data.jam;
+    document.getElementById('mDurasi').textContent     = data.durasi;
 
     if (data.harga_promo) {
         document.getElementById('mHarga').innerHTML =
@@ -490,19 +488,18 @@ function tampilModal(event, data) {
     const pemesanSection = document.getElementById('mPemesanSection');
     if (data.status === 'Penuh' && data.nama) {
         pemesanSection.style.display = 'block';
-        document.getElementById('mNama').textContent       = data.nama;
-        document.getElementById('mHP').textContent         = data.nomor_hp;
-        document.getElementById('mKode').textContent       = data.kode_booking;
-        document.getElementById('mStatusBayar').innerHTML  = bayarMap[data.status_bayar] || data.status_bayar;
+        document.getElementById('mNama').textContent      = data.nama;
+        document.getElementById('mHP').textContent        = data.nomor_hp;
+        document.getElementById('mKode').textContent      = data.kode_booking;
+        document.getElementById('mStatusBayar').innerHTML = bayarMap[data.status_bayar] || data.status_bayar;
     } else {
         pemesanSection.style.display = 'none';
     }
-
-    document.getElementById('modalOverlay').classList.add('show');
 }
 
 function tutupModal() {
     document.getElementById('modalOverlay').classList.remove('show');
+    document.getElementById('modalBox').style.display = 'none';
 }
 
 function cekTutupModal(e) {

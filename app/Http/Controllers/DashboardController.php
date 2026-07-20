@@ -13,13 +13,12 @@ class DashboardController extends Controller
     {
         $today = now()->toDateString();
 
-        $bookingHariIni = Booking::whereHas('jadwal', function($q) use ($today) {
-            $q->where('tanggal_jadwal', $today);
-        })->count();
+        $bookingHariIni = Booking::whereDate('created_at', $today)->count();
 
-        $pendapatanHariIni = Booking::whereHas('jadwal', function($q) use ($today) {
-            $q->where('tanggal_jadwal', $today);
-        })->where('status', 'Berhasil')->sum('total_bayar');
+
+        $pendapatanHariIni = Booking::whereDate('created_at', $today)
+            ->where('status', 'Berhasil')
+            ->sum('total_bayar');
 
         $lapanganAktif = Lapangan::where('status_lapangan', 'aktif')->count();
 
@@ -33,22 +32,20 @@ class DashboardController extends Controller
             $date = now()->subDays($i)->toDateString();
             return [
                 'tanggal' => now()->subDays($i)->format('D'),
-                'total'   => Booking::whereHas('jadwal', fn($q) => $q->where('tanggal_jadwal', $date))->count(),
+                'total'   => Booking::whereDate('created_at', $date)->count(),
             ];
         });
-
         // Status booking hari ini
         $statusHariIni = [
-            'berhasil'   => Booking::whereHas('jadwal', fn($q) => $q->where('tanggal_jadwal', $today))->where('status', 'Berhasil')->count(),
-            'tertunda'   => Booking::whereHas('jadwal', fn($q) => $q->where('tanggal_jadwal', $today))->where('status', 'Tertunda')->count(),
-            'dibatalkan' => Booking::whereHas('jadwal', fn($q) => $q->where('tanggal_jadwal', $today))->where('status', 'Dibatalkan')->count(),
+            'berhasil'   => Booking::whereDate('created_at', $today)->where('status', 'Berhasil')->count(),
+            'tertunda'   => Booking::whereDate('created_at', $today)->where('status', 'Tertunda')->count(),
+            'dibatalkan' => Booking::whereDate('created_at', $today)->where('status', 'Dibatalkan')->count(),
         ];
 
         // Booking terbaru
         $bookingTerbaru = Booking::with(['jadwal.lapangan', 'pelanggan'])
             ->latest()
-            ->take(10)
-            ->get();
+            ->paginate(10);
 
         return view('admin.dashboard', compact(
             'bookingHariIni',

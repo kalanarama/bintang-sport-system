@@ -26,7 +26,15 @@ class PembayaranController extends Controller
             return redirect()->route('pembayaran.sukses', $bookingId);
         }
 
-        return view('pelanggan.pembayaran.show', compact('booking'));
+        // Ambil semua booking dengan kode yang sama (multi-slot)
+        $semuaBooking = Booking::with(['jadwal.lapangan'])
+            ->where('kode_booking', $booking->kode_booking)
+            ->orderBy('jam_mulai')
+            ->get();
+
+        $totalKeseluruhan = $semuaBooking->sum('total_bayar');
+
+        return view('pelanggan.pembayaran.show', compact('booking', 'semuaBooking', 'totalKeseluruhan'));
     }
 
     /**
@@ -101,7 +109,8 @@ class PembayaranController extends Controller
     /**
      * Proses inti menandai booking berhasil.
      * Menggunakan lockForUpdate() untuk mencegah duplikasi notifikasi.
-     * Membuat Notifikasi database dan mengirim WhatsApp.
+     * Update semua booking dengan kode yang sama (multi-slot).
+     * Hanya membuat Notifikasi di database, TIDAK mengirim WhatsApp (agar tidak duplikat).
      */
     private function tandaiBerhasil(Booking $booking)
     {
@@ -114,24 +123,38 @@ class PembayaranController extends Controller
                 return;
             }
 
-            // Catat pembayaran
+            // Ambil semua booking dengan kode yang sama (multi-slot)
+            $semuaBooking = Booking::with(['jadwal.lapangan'])
+                ->where('kode_booking', $booking->kode_booking)
+                ->lockForUpdate()
+                ->orderBy('jam_mulai')
+                ->get();
+
+            $totalKeseluruhan = $semuaBooking->sum('total_bayar');
+
+            // Update semua slot jadi Berhasil dan jadwal jadi Penuh
+            foreach ($semuaBooking as $b) {
+                $b->update(['status' => 'Berhasil']);
+                Jadwal::where('id', $b->jadwal_id)->update(['status_jadwal' => 'Penuh']);
+            }
+
+            // Catat pembayaran (satu record untuk semua slot, total keseluruhan)
             Pembayaran::create([
                 'booking_id'         => $booking->id,
                 'metode_pembayaran'  => 'QRIS',
                 'tanggal_pembayaran' => now()->toDateString(),
-                'total_pembayaran'   => $booking->total_bayar,
+                'total_pembayaran'   => $totalKeseluruhan,
                 'status_pembayaran'  => 'Berhasil',
             ]);
 
-            // Update status booking
-            $booking->update(['status' => 'Berhasil']);
+            // Buat notifikasi di database (tanpa WhatsApp)
+            $jamMulai   = date('H.i', strtotime($semuaBooking->first()->jam_mulai));
+            $jamSelesai = date('H.i', strtotime($semuaBooking->last()->jam_selesai));
 
-            // Update status jadwal
-            Jadwal::where('id', $booking->jadwal_id)->update(['status_jadwal' => 'Penuh']);
-
-            // Buat notifikasi di database
-            $pesanNotif = "Booking berhasil! Kode: {$booking->kode_booking}. Lapangan: {$booking->jadwal->lapangan->nama_lapangan}, Tanggal: {$booking->jadwal->tanggal_jadwal}, Jam: "
-                . date('H.i', strtotime($booking->jam_mulai)) . "-" . date('H.i', strtotime($booking->jam_selesai)) . ".";
+            $pesanNotif = "Booking berhasil! Kode: {$booking->kode_booking}. " .
+                "Lapangan: {$booking->jadwal->lapangan->nama_lapangan}, " .
+                "Tanggal: {$booking->jadwal->tanggal_jadwal}, " .
+                "Jam: {$jamMulai}-{$jamSelesai}.";
 
             Notifikasi::create([
                 'booking_id'      => $booking->id,
@@ -140,22 +163,12 @@ class PembayaranController extends Controller
                 'status_terkirim' => true,
             ]);
 
-            // ✅ Kirim WhatsApp setelah pembayaran berhasil
-            if ($booking->pelanggan && $booking->pelanggan->nomor_hp) {
-                $pesanWa =
-                    "✅ *Bintang Sport Center*\n\n" .
-                    "Halo *{$booking->pelanggan->nama_pelanggan}*,\n" .
-                    "Pembayaran Anda telah kami terima.\n\n" .
-                    "🔖 No. Booking : *{$booking->kode_booking}*\n" .
-                    "🏟 Lapangan : {$booking->jadwal->lapangan->nama_lapangan}\n" .
-                    "📅 Tanggal : " . \Carbon\Carbon::parse($booking->jadwal->tanggal_jadwal)->locale('id')->translatedFormat('l, d F Y') . "\n" .
-                    "⏰ Jam : " . \Carbon\Carbon::parse($booking->jam_mulai)->format('H.i') . " - " . \Carbon\Carbon::parse($booking->jam_selesai)->format('H.i') . "\n" .
-                    "💰 Total : Rp" . number_format($booking->total_bayar, 0, ',', '.') . "\n\n" .
-                    "Terima kasih 🙏\n" .
-                    "*Bintang Sport Center*";
-
-                app(WhatsappService::class)->kirim($booking->pelanggan->nomor_hp, $pesanWa);
-            }
+            // ⛔ TIDAK MENGIRIM WHATSAPP LAGI (hanya notifikasi database)
+            // Jika ingin mengirim WhatsApp, aktifkan kode di bawah ini, tapi akan duplikat
+            // if ($booking->pelanggan && $booking->pelanggan->nomor_hp) {
+            //     $pesanWa = "✅ *Bintang Sport Center*\n\nHalo *{$booking->pelanggan->nama_pelanggan}*,\nPembayaran Anda telah kami terima.\n\n🔖 No. Booking : *{$booking->kode_booking}*\n🏟 Lapangan : {$booking->jadwal->lapangan->nama_lapangan}\n💰 Total : Rp" . number_format($totalKeseluruhan, 0, ',', '.') . "\n\nTerima kasih 🙏\n*Bintang Sport Center*";
+            //     app(WhatsappService::class)->kirim($booking->pelanggan->nomor_hp, $pesanWa);
+            // }
         });
     }
 
@@ -167,6 +180,14 @@ class PembayaranController extends Controller
         $booking = Booking::with(['jadwal.lapangan', 'pelanggan', 'pembayaran'])
             ->findOrFail($bookingId);
 
-        return view('pelanggan.pembayaran.sukses', compact('booking'));
+        // Ambil semua booking dengan kode yang sama (multi-slot)
+        $semuaBooking = Booking::with(['jadwal.lapangan'])
+            ->where('kode_booking', $booking->kode_booking)
+            ->orderBy('jam_mulai')
+            ->get();
+
+        $totalKeseluruhan = $semuaBooking->sum('total_bayar');
+
+        return view('pelanggan.pembayaran.sukses', compact('booking', 'semuaBooking', 'totalKeseluruhan'));
     }
 }
